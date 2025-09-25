@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>🕵️‍♂️ لعبة تغيير المظهر</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #111;
+      color: #fff;
+      direction: rtl;
+    }
+    .image-box {
+      position: relative;
+      display: inline-block;
+    }
+    img {
+      max-width: 300px;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      font-size: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .swap-btn { background-color: #3498db; color: #fff; }
+    .pick-btn { background-color: #2ecc71; color: #fff; }
+    .next-btn { background-color: #f39c12; color: #fff; display: none; }
+    #result { margin-top: 15px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  
+  <audio id="introSound" src="assets/intro.mp3" preload="auto"></audio>
+  <audio id="correctSound"></audio>
+  <audio id="wrongSound"></audio>
+  
+  <h1>🔍 لعبة تغيير المظهر</h1>
+  <p id="step-text">المرحلة 1: لازم تختار <b>اللحية</b> الصحيحة باش تشبه الـ VIP.</p>
+
+  <div class="image-box">
+    <img id="look" src="h0.jpg" alt="مظهري">
+    <div id="loading">⏳ جاري التحميل...</div>
+  </div>
+
+  <div>
+    <button class="swap-btn" onclick="swapLook()">↔️ تغيير المظهر</button>
+    <button class="pick-btn" onclick="pickLook()">✅ اختيار</button>
+    <button class="next-btn" id="nextBtn" onclick="nextStep()">➡️ المرحلة التالية</button>
+  </div>
+
+  <p id="result"></p>
+
+  <script>
+    const steps = [
+      { name: "اللحية", looks: ["h0.jpg", "h1.jpg", "h2.jpg", "h3.jpg", "h4.jpg"], correct: "h4.jpg" },
+      { name: "الشعر", looks: ["hh1.jpg", "hh2.jpg", "hh3.jpg", "hh4.jpg", "hh5.jpg"], correct: "hh5.jpg" },
+      { name: "الإكسسوارات", looks: ["a0.jpg", "a1.jpg", "a2.jpg", "a3.jpg", "a4.jpg"], correct: "a4.jpg" },
+      { name: "القميص", looks: ["s1.jpg", "s2.jpg", "s3.jpg", "s4.jpg", "s5.jpg", "s6.jpg"], correct: "s6.jpg" },
+      { name: "الجاكيت", looks: ["j1.jpg", "j2.jpg", "j3.jpg"], correct: "j3.jpg" }
+    ];
+
+    let currentStep = 0;
+    let currentIndex = 0;
+    const lookImg = document.getElementById("look");
+    const loading = document.getElementById("loading");
+    const result = document.getElementById("result");
+    const stepText = document.getElementById("step-text");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const introSound = document.getElementById("introSound");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+
+    // Play intro sound on user interaction
+    document.body.addEventListener('click', () => {
+        if (introSound.paused && introSound.currentTime === 0) {
+            introSound.play();
+        }
+    });
+
+    function swapLook() {
+      loading.style.display = "block";
+      result.textContent = "";
+      setTimeout(() => {
+        const step = steps[currentStep];
+        currentIndex = (currentIndex + 1) % step.looks.length;
+        lookImg.src = step.looks[currentIndex];
+        loading.style.display = "none";
+      }, 1000);
+    }
+
+    function pickLook() {
+      const step = steps[currentStep];
+      if (step.looks[currentIndex] === step.correct) {
+        result.textContent = `🎉 مبروك! اخترت ${step.name} الصحيح.`;
+        result.style.color = "#2ecc71";
+        nextBtn.style.display = "inline-block";
+        playCorrectSound();
+      } else {
+        result.textContent = `🚨 ${step.name} هذا سيفضحك! حاول مرة أخرى.`;
+        result.style.color = "#e74c3c";
+        nextBtn.style.display = "none";
+        playWrongSound();
+      }
+    }
+
+    function nextStep() {
+      currentStep++;
+      if (currentStep < steps.length) {
+        stepText.textContent = `المرحلة ${currentStep + 1}: لازم تختار ${steps[currentStep].name} الصحيح.`;
+        currentIndex = 0;
+        lookImg.src = steps[currentStep].looks[currentIndex];
+        result.textContent = "";
+        nextBtn.style.display = "none";
+      } else {
+        stepText.textContent = "🎉 تنكّرت بنجاح مثل الـ VIP! مستعد تدخل المحل.";
+        lookImg.style.display = "none";
+        document.querySelector(".swap-btn").style.display = "none";
+        document.querySelector(".pick-btn").style.display = "none";
+        nextBtn.style.display = "none";
+      }
+    }
+
+    function playCorrectSound() {
+        const soundNumber = currentStep + 1;
+        correctSound.src = `assets/c${soundNumber}.mp3`;
+        correctSound.play();
+    }
+
+    let wrongSoundIndex = 1; // start with m1
+
+function playWrongSound() {
+    wrongSound.src = `assets/m${wrongSoundIndex}.mp3`;
+    wrongSound.play();
+
+    // increment and loop back after m8
+    wrongSoundIndex++;
+    if (wrongSoundIndex > 8) {
+        wrongSoundIndex = 1;
+    }
+}
+
+  </script>
+</body>
+</html>
