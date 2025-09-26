@@ -1,345 +1,432 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Phone Mockup — Guess the PIN</title>
-  <style>
-    /* Original Styles Preserved */
-    :root{--bg:#0b0b0f;--phone:#0f1720;--screen:#0b1220;--accent:#1fb6ff;--muted:#97a0b3;--hack-green:#48ff48}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#06060a 0%, #0e1220 100%);color:#e6eef8}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Phone Mockup — Guess the PIN</title>
+    <style>
+        :root{--bg:#0b0b0f;--phone:#0f1720;--screen:#0b1220;--accent:#1fb6ff;--muted:#97a0b3;--red: #ff3860}
+        html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+        body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#06060a 0%, #0e1220 100%);color:#e6eef8}
 
-    /* phone */
-    .phone{width:360px;height:720px;border-radius:36px;background:linear-gradient(180deg,#0b1220,#06101a);box-shadow:0 20px 60px rgba(2,6,23,.7), inset 0 1px 0 rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column}
-    .notch{height:32px;display:flex;align-items:center;justify-content:center}
-    .screen{flex:1;background:var(--screen);border-radius:22px;padding:18px;overflow:hidden;position:relative}
+        /* phone */
+        .phone{width:360px;height:720px;border-radius:36px;background:linear-gradient(180deg,#0b1220,#06101a);box-shadow:0 20px 60px rgba(2,6,23,.7), inset 0 1px 0 rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column}
+        .notch{height:32px;display:flex;align-items:center;justify-content:center}
+        .screen{flex:1;background:var(--screen);border-radius:22px;padding:18px;overflow:hidden;position:relative}
 
-    /* lock screen */
-    .lock-center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-    .time{font-size:48px;font-weight:600}
-    .date{color:var(--muted)}
-    .pin-dots{display:flex;gap:12px}
-    .dot{width:12px;height:12px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,.18)}
-    .dot.filled{background:var(--accent);border-color:transparent}
+        /* lock screen */
+        .lock-center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+        .time{font-size:48px;font-weight:600}
+        .date{color:var(--muted)}
+        .pin-dots{display:flex;gap:12px}
+        .dot{width:12px;height:12px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,.18)}
+        .dot.filled{background:var(--accent);border-color:transparent}
 
-    /* keypad */
-    .keypad{position:absolute;left:0;right:0;bottom:0;padding:18px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.3));display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .key{background:rgba(255,255,255,.04);padding:14px;border-radius:12px;text-align:center;font-size:18px;user-select:none;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
-    .key:active{transform:translateY(1px)}
-    .key.small{grid-column:span:3}
+        /* keypad */
+        .keypad{position:absolute;left:0;right:0;bottom:0;padding:18px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.3));display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+        .key{background:rgba(255,255,255,.04);padding:14px;border-radius:12px;text-align:center;font-size:18px;user-select:none;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+        .key:active{transform:translateY(1px)}
+        .key.small{grid-column:span:3}
 
-    /* home */
-    .home{display:none;height:100%;width:100%;flex-direction:column}
-    .app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px}
-    .app{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
-    .app .icon{width:64px;height:64px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));display:flex;align-items:center;justify-content:center;font-size:28px}
-    .label{font-size:12px;color:var(--muted);text-align:center}
+        /* home */
+        .home{display:none;height:100%;width:100%;flex-direction:column}
+        .app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px}
+        .app{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+        .app .icon{width:64px;height:64px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));display:flex;align-items:center;justify-content:center;font-size:28px}
+        .label{font-size:12px;color:var(--muted);text-align:center}
 
-    /* gallery and cctv */
-    .overlay{position:absolute;inset:0;background:rgba(2,6,23,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px}
-    .panel{width:100%;height:100%;background:linear-gradient(180deg,#08101a,#04101a);border-radius:16px;padding:14px;overflow:auto}
-    .panel .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
-    .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
+        /* gallery */
+        .overlay{position:absolute;inset:0;background:rgba(2,6,23,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px}
+        .panel{width:100%;height:100%;background:linear-gradient(180deg,#08101a,#04101a);border-radius:16px;padding:14px;overflow:auto}
+        .panel .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px; cursor: pointer;}
+        
+        /* context menu styles */
+        #imageContextMenu{
+            position: fixed; /* Use fixed for absolute screen positioning */
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: none; 
+            z-index: 1000; 
+            display: none; /* Controlled by JS */
+            align-items: flex-start; 
+            justify-content: flex-start;
+            padding: 0;
+        }
+        #contextMenuPanel{
+            position: absolute; /* Positioned relative to the overlay's origin */
+            width: auto;
+            min-width: 150px;
+            height: auto;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+            background: var(--phone);
+            overflow: visible;
+        }
+        .menu-item{
+            padding: 10px 12px; 
+            cursor: pointer; 
+            border-radius: 6px;
+            transition: background 0.1s;
+            font-size: 14px;
+        }
+        .menu-item:hover{
+            background: rgba(255,255,255,.08);
+        }
+        .menu-separator {
+            height: 1px;
+            background-color: rgba(255,255,255,.1);
+            margin: 6px 0;
+        }
 
-    /* hacking screen (New styles) */
-    .hack-screen{position:absolute;inset:0;background:var(--screen);border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
-    .hack-screen .terminal{font-family:monospace;white-space:pre;text-align:left;color:var(--hack-green);font-size:14px;padding:10px;background:rgba(0,0,0,.3);border-radius:6px;width:100%;max-width:300px;height:150px;overflow-y:scroll}
-    .hack-screen .bar-container{width:100%;max-width:300px;background:rgba(255,255,255,.1);border-radius:4px;height:24px;overflow:hidden;border:1px solid var(--hack-green)}
-    .hack-screen .bar-fill{height:100%;width:0;background:var(--hack-green);transition:width 0.1s ease-out}
-    .hack-screen .bar-label{color:var(--hack-green);font-weight:600;margin-bottom:8px}
-    .hack-screen .hack-btn{padding:12px 24px;background:var(--hack-green);color:var(--bg);border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #2e962e}
-    .hack-screen .hack-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #2e962e}
 
-    /* small helpers */
-    .btn{text-transform:uppercase;font-size:12px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);cursor:pointer}
+        /* CCTV panel */
+        .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
 
-    /* responsive */
-    @media (max-width:420px){.phone{transform:scale(.9)}}
-  </style>
+        /* small helpers */
+        .btn{text-transform:uppercase;font-size:12px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);cursor:pointer}
+
+        /* responsive */
+        @media (max-width:420px){.phone{transform:scale(.9)}}
+    </style>
 </head>
 <body>
-  <div class="phone" role="application" aria-label="Phone mockup">
-    <div class="notch"></div>
-    <div class="screen">
-            <div class="hack-screen" id="hackScreen">
-        <div style="font-size:24px;font-weight:600;color:var(--hack-green)">INITIATING PIN CRACK</div>
-        <div class="terminal" id="terminalOutput">
-          [STATUS] Initiating secure shell session...
-          [STATUS] Accessing key storage module...
-          [STATUS] Brute force required. Accelerate process.
-        </div>
-        <div>
-          <div class="bar-label">HACKING</div>
-          <div class="bar-container">
-            <div class="bar-fill" id="hackBar"></div>
-          </div>
-        </div>
-        <button class="hack-btn" id="hackButton">CLICK TO ACCELERATE</button>
-        <div id="clickCountDisplay" style="color:var(--muted)">Clicks: 0</div>
-      </div>
+    <div class="phone" role="application" aria-label="Phone mockup">
+        <div class="notch"></div>
+        <div class="screen">
+            <div class="lock-screen lock-center" id="lockScreen">
+                <div style="text-align:center">
+                    <div class="time" id="time">09:41</div>
+                    <div class="date" id="date">Thursday, Sep 26</div>
+                </div>
+                <div style="text-align:center">
+                    <div style="margin-bottom:6px;color:var(--muted)">Enter PIN</div>
+                    <div class="pin-dots" id="dots">
+                        <div class="dot" data-index="0"></div>
+                        <div class="dot" data-index="1"></div>
+                        <div class="dot" data-index="2"></div>
+                        <div class="dot" data-index="3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home" id="homeScreen" aria-hidden="true">
+                <div style="padding:14px 18px;color:var(--muted)">Home</div>
+                <div class="app-grid">
+                    <div class="app" id="appCCTV" tabindex="0" role="button" aria-label="CCTV app">
+                        <div class="icon">📹</div>
+                        <div class="label">CCTV</div>
+                    </div>
+                    <div class="app" id="appGallery" tabindex="0" role="button" aria-label="Gallery app">
+                        <div class="icon">🖼️</div>
+                        <div class="label">Gallery</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="keypad" id="keypad">
+                <div class="key" data-key="1">1</div>
+                <div class="key" data-key="2">2</div>
+                <div class="key" data-key="3">3</div>
+                <div class="key" data-key="4">4</div>
+                <div class="key" data-key="5">5</div>
+                <div class="key" data-key="6">6</div>
+                <div class="key" data-key="7">7</div>
+                <div class="key" data-key="8">8</div>
+                <div class="key" data-key="9">9</div>
+                <div class="key" data-key="*">*</div>
+                <div class="key" data-key="0">0</div>
+                <div class="key" id="keyBack">⌫</div>
+            </div>
+
+            <div class="overlay" id="galleryOverlay" aria-hidden="true">
+                <div class="panel">
+                    <div class="top"><div style="font-weight:600">Gallery</div><div><button class="btn" id="closeGallery">Close</button></div></div>
+                    <div class="grid" id="galleryGrid">
+                        </div>
+                </div>
+                <div class="overlay" id="imageContextMenu" aria-hidden="true">
+                    <div class="panel" id="contextMenuPanel">
+                        <div class="menu-item" id="menuItemSendToNetwork">Send to Network</div>
+                        <div class="menu-separator"></div>
+                        <div class="menu-item" id="menuItemView">View Image</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overlay" id="cctvOverlay" aria-hidden="true">
+                <div class="panel">
+                    <div class="top"><div style="font-weight:600">CCTV</div><div><button class="btn" id="closeCCTV">Close</button></div></div>
+                    <div class="cctv-screen">Live feed unavailable — placeholder camera view</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PIN = '1966';
+        const MAX_DIGITS = 4;
+
+        const dots = document.querySelectorAll('.dot');
+        const keys = document.querySelectorAll('.key');
+        const back = document.getElementById('keyBack');
+        const keypad = document.getElementById('keypad');
+        const lockScreen = document.getElementById('lockScreen');
+        const homeScreen = document.getElementById('homeScreen');
+        const appGallery = document.getElementById('appGallery');
+        const appCCTV = document.getElementById('appCCTV');
+        const galleryOverlay = document.getElementById('galleryOverlay');
+        const closeGallery = document.getElementById('closeGallery');
+        const cctvOverlay = document.getElementById('cctvOverlay');
+        const closeCCTV = document.getElementById('closeCCTV');
+        const galleryGrid = document.getElementById('galleryGrid');
+        
+        // NEW: Context menu elements
+        const imageContextMenu = document.getElementById('imageContextMenu');
+        const contextMenuPanel = document.getElementById('contextMenuPanel');
+        const menuItemSendToNetwork = document.getElementById('menuItemSendToNetwork');
+        const menuItemView = document.getElementById('menuItemView');
+
+        let entered = '';
+        let pressTimer; // Variable to hold the long-press timer
+        let currentImageSrc = ''; // To store the source of the currently held image
+
+        // --- Keypad Logic (Original) ---
+        keys.forEach(k=>{
+            k.addEventListener('click', ()=> handleKey(k.dataset.key));
+        });
+        back.addEventListener('click', ()=>{
+            entered = entered.slice(0,-1);
+            refreshDots();
+        });
+
+        function handleKey(key){
+            if(key === undefined || key === '*' || key === '⌫') return;
+            if(entered.length >= MAX_DIGITS) return;
+            entered += key;
+            refreshDots();
+            if(entered.length === MAX_DIGITS) checkPin();
+        }
+
+        function refreshDots(){
+            dots.forEach((d,i)=>{
+                d.classList.toggle('filled', i < entered.length);
+            });
+        }
+
+        function checkPin(){
+            if(entered === CORRECT_PIN){
+                unlock();
+            } else {
+                shake();
+                entered = '';
+                setTimeout(refreshDots, 250);
+            }
+        }
+
+        function shake(){
+            lockScreen.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-12px)' },
+                { transform: 'translateX(12px)' },
+                { transform: 'translateX(0)' }
+            ],{ duration: 400, iterations: 1 });
+        }
+
+        function unlock(){
+            lockScreen.style.display = 'none';
+            keypad.style.display = 'none';
+            homeScreen.style.display = 'flex';
+            homeScreen.setAttribute('aria-hidden','false');
+        }
+        // --- End Keypad Logic ---
 
 
-            <div class="lock-screen lock-center" id="lockScreen" style="display:none">
-        <div style="text-align:center">
-          <div class="time" id="time">09:41</div>
-          <div class="date" id="date">Thursday, Sep 26</div>
-        </div>
-        <div style="text-align:center">
-          <div style="margin-bottom:6px;color:var(--muted)">Enter PIN</div>
-          <div class="pin-dots" id="dots">
-            <div class="dot" data-index="0"></div>
-            <div class="dot" data-index="1"></div>
-            <div class="dot" data-index="2"></div>
-            <div class="dot" data-index="3"></div>
-        </div>
-        </div>
-      </div>
-
-            <div class="home" id="homeScreen" aria-hidden="true">
-        <div style="padding:14px 18px;color:var(--muted)">Home</div>
-        <div class="app-grid">
-          <div class="app" id="appCCTV" tabindex="0" role="button" aria-label="CCTV app">
-            <div class="icon">📹</div>
-            <div class="label">CCTV</div>
-          </div>
-          <div class="app" id="appGallery" tabindex="0" role="button" aria-label="Gallery app">
-            <div class="icon">🖼️</div>
-            <div class="label">Gallery</div>
-          </div>
-        </div>
-      </div>
-
-            <div class="keypad" id="keypad" style="display:none">
-        <div class="key" data-key="1">1</div>
-        <div class="key" data-key="2">2</div>
-        <div class="key" data-key="3">3</div>
-        <div class="key" data-key="4">4</div>
-        <div class="key" data-key="5">5</div>
-        <div class="key" data-key="6">6</div>
-        <div class="key" data-key="7">7</div>
-        <div class="key" data-key="8">8</div>
-        <div class="key" data-key="9">9</div>
-        <div class="key" data-key="*">*</div>
-        <div class="key" data-key="0">0</div>
-        <div class="key" id="keyBack">⌫</div>
-      </div>
-
-            <div class="overlay" id="galleryOverlay" aria-hidden="true">
-        <div class="panel">
-          <div class="top"><div style="font-weight:600">Gallery</div><div><button class="btn" id="closeGallery">Close</button></div></div>
-          <div class="grid" id="galleryGrid">
-                      </div>
-        </div>
-      </div>
-
-      <div class="overlay" id="cctvOverlay" aria-hidden="true">
-        <div class="panel">
-          <div class="top"><div style="font-weight:600">CCTV</div><div><button class="btn" id="closeCCTV">Close</button></div></div>
-          <div class="cctv-screen">Live feed unavailable — placeholder camera view</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    const CORRECT_PIN = '1966';
-    const MAX_DIGITS = 4;
-    const HACK_CLICKS_NEEDED = 30; // Clicks required
-
-    // DOM elements for PIN screen
-    const dots = document.querySelectorAll('.dot');
-    const keys = document.querySelectorAll('.key');
-    const back = document.getElementById('keyBack');
-    const keypad = document.getElementById('keypad');
-    const lockScreen = document.getElementById('lockScreen');
-    const homeScreen = document.getElementById('homeScreen');
-    const appGallery = document.getElementById('appGallery');
-    const appCCTV = document.getElementById('appCCTV');
-    const galleryOverlay = document.getElementById('galleryOverlay');
-    const closeGallery = document.getElementById('closeGallery');
-    const cctvOverlay = document.getElementById('cctvOverlay');
-    const closeCCTV = document.getElementById('closeCCTV');
-    const galleryGrid = document.getElementById('galleryGrid');
-
-    // DOM elements for Hacking screen
-    const hackScreen = document.getElementById('hackScreen');
-    const hackButton = document.getElementById('hackButton');
-    const hackBar = document.getElementById('hackBar');
-    const terminalOutput = document.getElementById('terminalOutput');
-    const clickCountDisplay = document.getElementById('clickCountDisplay');
-
-    let entered = '';
-    let hackClicks = 0;
-    let terminalLines = [
-      '[STATUS] Initiating secure shell session...',
-      '[STATUS] Accessing key storage module...',
-      '[STATUS] Brute force required. Accelerate process.'
-    ];
-    const terminalMessages = [
-      '[INFO] Dictionary attack failed. Increasing entropy.',
-      '[WARNING] Firewall detected. Bypassing protocol v2.1...',
-      '[PROCESS] Enumerating local keyspace. $pin_hash = 0x' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-      '[SUCCESS] Key fragment found: ' + Math.floor(Math.random() * 10),
-      '[PROCESS] Retrying handshake. Click faster!',
-      '[INFO] Connecting to external exploit DB...',
-      '[WARNING] High latency. Network traffic monitored.'
-    ];
+        // --- Time/Date Logic (Original) ---
+        function tickTime(){
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2,'0');
+            const mm = String(now.getMinutes()).padStart(2,'0');
+            document.getElementById('time').textContent = hh + ':' + mm;
+            const options = { weekday: 'long', month:'short', day:'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
+        }
+        tickTime(); setInterval(tickTime, 30*1000);
+        // --- End Time/Date Logic ---
 
 
-    // --- HACKING SCREEN LOGIC ---
+        // --- Gallery Logic (Modified) ---
 
-    hackButton.addEventListener('click', handleHackClick);
+        // 1. Modified loadGallery to include long-press listeners
+        function loadGallery(){
+            galleryGrid.innerHTML = '';
+            for(let i=1;i<=6;i++){
+                const img = document.createElement('img');
+                // Note: The image source is still a placeholder, ensure 'assets/1.jpg' exists for full functionality
+                img.src = `assets/${i}.jpg`; 
+                img.alt = `Photo ${i}`;
+                img.className = 'thumb';
+                
+                // Attach event listeners for both mouse and touch
+                img.addEventListener('mousedown', startPress);
+                img.addEventListener('mouseup', endPress);
+                img.addEventListener('mouseleave', endPress);
+                img.addEventListener('touchstart', startPress);
+                img.addEventListener('touchend', endPress);
+                
+                // Store the image source on the element itself for easy access in handlers
+                img.dataset.src = img.src; 
 
-    function handleHackClick() {
-      if (hackClicks >= HACK_CLICKS_NEEDED) return;
-      
-      hackClicks++;
-      const percentage = Math.min(100, (hackClicks / HACK_CLICKS_NEEDED) * 100);
-      hackBar.style.width = `${percentage}%`;
-      clickCountDisplay.textContent = `Clicks: ${hackClicks}`;
+                galleryGrid.appendChild(img);
+            }
+        }
 
-      // Add a new terminal line periodically
-      if (hackClicks % 4 === 0 && hackClicks < HACK_CLICKS_NEEDED) {
-        const newLine = terminalMessages[Math.floor(Math.random() * terminalMessages.length)];
-        appendTerminal(newLine);
-      }
+        function openImageFull(src){
+             // Only open if the context menu is not visible/active
+            if (imageContextMenu.style.display !== 'flex') { 
+                window.open(src, '_blank');
+            }
+        }
 
-      if (hackClicks >= HACK_CLICKS_NEEDED) {
-        appendTerminal('[SUCCESS] PIN hash cracked. Accessing Lock Screen...');
-        hackButton.textContent = 'ACCESS GRANTED';
-        hackButton.disabled = true;
-        setTimeout(showLockScreen, 1500); // Transition after a delay
-      }
-    }
+        // 2. Start the long-press timer
+        function startPress(e){
+            e.preventDefault(); // Prevent default browser context menu/mobile scrolling
+            const target = e.currentTarget;
+            currentImageSrc = target.dataset.src; // Store the source
 
-    function appendTerminal(message) {
-      terminalLines.push(message);
-      if (terminalLines.length > 8) terminalLines.shift(); // Keep only last 8 lines
-      terminalOutput.textContent = terminalLines.join('\n');
-      terminalOutput.scrollTop = terminalOutput.scrollHeight; // Auto-scroll
-    }
+            // Clear any existing timer just in case
+            clearTimeout(pressTimer); 
 
-    function showLockScreen() {
-      hackScreen.style.display = 'none';
-      lockScreen.style.display = 'flex';
-      keypad.style.display = 'grid';
-    }
+            // Set a timer for 500ms (0.5 seconds) to simulate a long press
+            pressTimer = setTimeout(()=>{
+                // Check if it's the specific target image (image 1.jpg)
+                if(currentImageSrc.endsWith('assets/1.jpg')){ 
+                    showContextMenu(e); // Show the menu
+                } else {
+                    // For other images, treat long press as a view action
+                    openImageFull(currentImageSrc);
+                    currentImageSrc = ''; 
+                }
+            }, 500); 
+        }
 
-    // --- PIN SCREEN LOGIC ---
+        // 3. End the press (either mouse up or mouse leave)
+        function endPress(e){
+            // If the timer is still running (meaning it was a short press/tap)
+            if(pressTimer){
+                clearTimeout(pressTimer);
+                
+                // If it was a short press/tap on image 1, perform the default view action
+                if(currentImageSrc.endsWith('assets/1.jpg') && imageContextMenu.style.display !== 'flex'){
+                    openImageFull(currentImageSrc);
+                }
+            }
+            currentImageSrc = '';
+        }
 
-    keys.forEach(k=>{
-      k.addEventListener('click', ()=> handleKey(k.dataset.key));
-    });
-    back.addEventListener('click', ()=>{
-      entered = entered.slice(0,-1);
-      refreshDots();
-    });
+        // 4. Display the context menu
+        function showContextMenu(e){
+            imageContextMenu.style.display = 'flex';
+            imageContextMenu.setAttribute('aria-hidden','false');
+            
+            // Get the click position relative to the screen (handles mouse and touch)
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            // Set the position of the menu panel (simplified positioning, adjusting for phone borders)
+            const phoneRect = document.querySelector('.phone').getBoundingClientRect();
+            let posX = clientX - phoneRect.left;
+            let posY = clientY - phoneRect.top;
 
-    function handleKey(key){
-      if(key === undefined || key === '*' || key === '⌫') return;
-      if(entered.length >= MAX_DIGITS) return;
-      entered += key;
-      refreshDots();
-      if(entered.length === MAX_DIGITS) checkPin();
-    }
+            // Simple bounds check for the menu panel
+            const menuWidth = contextMenuPanel.offsetWidth || 180;
+            const menuHeight = contextMenuPanel.offsetHeight || 120;
+            const screenPadding = 20;
 
-    function refreshDots(){
-      dots.forEach((d,i)=>{
-        d.classList.toggle('filled', i < entered.length);
-      });
-    }
+            if (posX + menuWidth > phoneRect.width - screenPadding) {
+                posX = phoneRect.width - menuWidth - screenPadding;
+            }
+            if (posY + menuHeight > phoneRect.height - screenPadding) {
+                posY = phoneRect.height - menuHeight - screenPadding;
+            }
+            
+            contextMenuPanel.style.left = `${posX}px`;
+            contextMenuPanel.style.top = `${posY}px`;
 
-    function checkPin(){
-      if(entered === CORRECT_PIN){
-        unlock();
-      } else {
-        shake();
-        entered = '';
-        setTimeout(refreshDots, 400); 
-      }
-    }
+            // Setup the View option handler dynamically
+            menuItemView.onclick = () => {
+                hideContextMenu();
+                window.open(currentImageSrc, '_blank');
+            };
+        }
 
-    function shake(){
-      lockScreen.animate([
-        { transform: 'translateX(0)' },
-        { transform: 'translateX(-12px)' },
-        { transform: 'translateX(12px)' },
-        { transform: 'translateX(0)' }
-      ],{ duration: 400, iterations: 1 });
-    }
+        // 5. Hide the context menu
+        function hideContextMenu(){
+            imageContextMenu.style.display = 'none';
+            imageContextMenu.setAttribute('aria-hidden','true');
+            currentImageSrc = '';
+        }
+        // --- End Gallery Logic (Modified) ---
 
-    function unlock(){
-      lockScreen.style.display = 'none';
-      keypad.style.display = 'none';
-      homeScreen.style.display = 'flex';
-      homeScreen.setAttribute('aria-hidden','false');
-    }
 
-    // --- GENERAL & APP FUNCTIONS ---
+        // --- App/Overlay Event Listeners (Original + New Menu Click) ---
 
-    function tickTime(){
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2,'0');
-      const mm = String(now.getMinutes()).padStart(2,'0');
-      document.getElementById('time').textContent = hh + ':' + mm;
-      const options = { weekday: 'long', month:'short', day:'numeric' };
-      document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
-    }
-    tickTime(); setInterval(tickTime, 30*1000);
+        // Gallery App Click
+        appGallery.addEventListener('click', ()=>{
+            galleryOverlay.style.display = 'flex';
+            galleryOverlay.setAttribute('aria-hidden','false');
+            loadGallery();
+        });
+        
+        // Close Gallery Button
+        closeGallery.addEventListener('click', ()=>{
+            galleryOverlay.style.display = 'none';
+            galleryOverlay.setAttribute('aria-hidden','true');
+            hideContextMenu(); // Ensure menu is closed if visible
+        });
+        
+        // CCTV App Click
+        appCCTV.addEventListener('click', ()=>{
+            cctvOverlay.style.display = 'flex';
+            cctvOverlay.setAttribute('aria-hidden','false');
+        });
+        
+        // Close CCTV Button
+        closeCCTV.addEventListener('click', ()=>{
+            cctvOverlay.style.display = 'none';
+            cctvOverlay.setAttribute('aria-hidden','true');
+        });
 
-    function loadGallery(){
-      galleryGrid.innerHTML = '';
-      for(let i=1;i<=6;i++){
-        const img = document.createElement('img');
-        // NOTE: The actual images (assets/1.jpg etc.) must exist for this to work.
-        // For a standalone mockup, you might use placeholder image services.
-        img.src = `assets/${i}.jpg`; 
-        img.alt = `Photo ${i}`;
-        img.className = 'thumb';
-        img.addEventListener('click', ()=> openImageFull(img.src));
-        galleryGrid.appendChild(img);
-      }
-    }
+        // Context Menu: "Send to Network" Action
+        menuItemSendToNetwork.addEventListener('click', ()=>{
+            alert(`✅ ACTION: Sending ${currentImageSrc.split('/').pop()} to Network...`);
+            hideContextMenu();
+        });
 
-    function openImageFull(src){
-      window.open(src, '_blank');
-    }
+        // Context Menu: Close when clicking on the background overlay
+        imageContextMenu.addEventListener('click', (e)=>{
+            // Check if the click target is the overlay background itself, not the menu panel
+            if(e.target.id === 'imageContextMenu'){
+                hideContextMenu();
+            }
+        });
 
-    appGallery.addEventListener('click', ()=>{
-      galleryOverlay.style.display = 'flex';
-      galleryOverlay.setAttribute('aria-hidden','false');
-      loadGallery();
-    });
-    closeGallery.addEventListener('click', ()=>{
-      galleryOverlay.style.display = 'none';
-      galleryOverlay.setAttribute('aria-hidden','true');
-    });
+        // Keyboard Handlers (Original)
+        window.addEventListener('keydown', (e)=>{
+            if(document.getElementById('lockScreen').style.display === 'none') return;
+            if(e.key >= '0' && e.key <= '9'){
+                handleKey(e.key);
+            } else if(e.key === 'Backspace'){
+                entered = entered.slice(0,-1); refreshDots();
+            }
+        });
 
-    appCCTV.addEventListener('click', ()=>{
-      cctvOverlay.style.display = 'flex';
-      cctvOverlay.setAttribute('aria-hidden','false');
-    });
-    closeCCTV.addEventListener('click', ()=>{
-      cctvOverlay.style.display = 'none';
-      cctvOverlay.setAttribute('aria-hidden','true');
-    });
-
-    // Keyboard support for PIN entry (only active on lock screen)
-    window.addEventListener('keydown', (e)=>{
-      if(lockScreen.style.display === 'none' || lockScreen.style.display === '') return; // Only work when lock screen is visible
-      if(e.key >= '0' && e.key <= '9'){
-        handleKey(e.key);
-      } else if(e.key === 'Backspace'){
-        entered = entered.slice(0,-1); refreshDots();
-      }
-    });
-
-    appGallery.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appGallery.click(); });
-    appCCTV.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appCCTV.click(); });
-  </script>
+        appGallery.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appGallery.click(); });
+        appCCTV.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appCCTV.click(); });
+        // --- End App/Overlay Event Listeners ---
+    </script>
 </body>
 </html>
