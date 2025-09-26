@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لعبة الهاتف</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .phone {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      text-align: center;
+      width: 300px;
+    }
+    .screen {
+      background-color: #000;
+      color: #0f0;
+      font-size: 20px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      min-height: 40px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    button {
+      font-size: 20px;
+      padding: 15px;
+      border: none;
+      border-radius: 50%;
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    #message {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #ffd700;
+    }
+    #ready-section {
+      margin-top: 20px;
+      display: none;
+    }
+    #decision-section {
+      margin-top: 20px;
+      display: none;
+    }
+    .choice-btn {
+      margin: 5px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .choice-btn.divide {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .choice-btn.steal {
+      background-color: #dc3545;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen" id="screen"></div>
+    <div class="buttons">
+      <button onclick="press('1')">1</button>
+      <button onclick="press('2')">2</button>
+      <button onclick="press('3')">3</button>
+      <button onclick="press('4')">4</button>
+      <button onclick="press('5')">5</button>
+      <button onclick="press('6')">6</button>
+      <button onclick="press('7')">7</button>
+      <button onclick="press('8')">8</button>
+      <button onclick="press('9')">9</button>
+      <button onclick="clearScreen()">⌫</button>
+      <button onclick="press('0')">0</button>
+      <button onclick="call()">📞</button>
+    </div>
+    <div id="message">قسموا رواحكم على زوز هواتف فقط، خاتر الرسالة الجاية حساسة</div>
+    <div id="ready-section">
+      <button onclick="areYouSure()">أنا جاهز</button>
+    </div>
+    <div id="decision-section">
+      <p>أحسنت! المهمة نجحت ✅<br>أما توا، عندك خيار:</p>
+      <button class="choice-btn divide" onclick="choose('divide')">تقسيم مع شريكك</button>
+      <button class="choice-btn steal" onclick="choose('steal')">تسرق نصيب شريكك</button>
+    </div>
+  </div>
+
+  <script>
+    let input = "";
+    const secretNumber = "01020304";
+
+    function press(num) {
+      input += num;
+      document.getElementById("screen").innerText = input;
+    }
+
+    function clearScreen() {
+      input = input.slice(0, -1);
+      document.getElementById("screen").innerText = input;
+    }
+
+    function call() {
+      if (input === secretNumber) {
+        document.getElementById("message").innerText = "هل أنتم متأكدين اللي راكم زوز مجموعات منفصلين بعيد على بعض؟";
+        document.getElementById("ready-section").style.display = "block";
+      } else {
+        document.getElementById("message").innerText = "🚫 الرقم غالط، جرّب مرّة أخرى";
+      }
+    }
+
+    function areYouSure() {
+      document.getElementById("message").innerText = "";
+      document.getElementById("ready-section").style.display = "none";
+      document.getElementById("decision-section").style.display = "block";
+    }
+
+    function choose(option) {
+      if (option === "divide") {
+        document.getElementById("message").innerText = "⚖️ اخترت التقسيم. النتيجة تعتمد على شريكك.";
+      } else {
+        document.getElementById("message").innerText = "💰 اخترت السرقة. النتيجة تعتمد على شريكك.";
+      }
+    }
+  </script>
+</body>
+</html>
