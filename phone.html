@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Phone Mockup — Guess the PIN</title>
   <style>
+    /* Original Styles Preserved */
     :root{--bg:#0b0b0f;--phone:#0f1720;--screen:#0b1220;--accent:#1fb6ff;--muted:#97a0b3;--hack-green:#48ff48}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
     body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#06060a 0%, #0e1220 100%);color:#e6eef8}
@@ -43,7 +44,7 @@
     .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
     .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
 
-    /* hacking screen */
+    /* hacking screen (New styles) */
     .hack-screen{position:absolute;inset:0;background:var(--screen);border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
     .hack-screen .terminal{font-family:monospace;white-space:pre;text-align:left;color:var(--hack-green);font-size:14px;padding:10px;background:rgba(0,0,0,.3);border-radius:6px;width:100%;max-width:300px;height:150px;overflow-y:scroll}
     .hack-screen .bar-container{width:100%;max-width:300px;background:rgba(255,255,255,.1);border-radius:4px;height:24px;overflow:hidden;border:1px solid var(--hack-green)}
@@ -294,6 +295,8 @@
       galleryGrid.innerHTML = '';
       for(let i=1;i<=6;i++){
         const img = document.createElement('img');
+        // NOTE: The actual images (assets/1.jpg etc.) must exist for this to work.
+        // For a standalone mockup, you might use placeholder image services.
         img.src = `assets/${i}.jpg`; 
         img.alt = `Photo ${i}`;
         img.className = 'thumb';
@@ -327,7 +330,7 @@
 
     // Keyboard support for PIN entry (only active on lock screen)
     window.addEventListener('keydown', (e)=>{
-      if(lockScreen.style.display === 'none' || lockScreen.style.display === '') return; // Check if lock screen is visible
+      if(lockScreen.style.display === 'none' || lockScreen.style.display === '') return; // Only work when lock screen is visible
       if(e.key >= '0' && e.key <= '9'){
         handleKey(e.key);
       } else if(e.key === 'Backspace'){
