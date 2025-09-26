@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الثقة مع الأستاذ الشريف</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Replace with a suitable Arabic font if available */
+            background-color: #f8f9fa;
+        }
+        .game-container {
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+        .choice-btn {
+            margin: 10px 0;
+            font-size: 1.1em;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .choice-btn:hover {
+            transform: translateY(-2px);
+        }
+        .gauge-bar {
+            height: 30px;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #212529; /* Dark text for better visibility */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container game-container">
+    <h1 class="text-center mb-4 text-primary">لعبة الثقة مع الأستاذ الشريف</h1>
+
+    <div class="mb-4">
+        <h5 class="text-center">مقياس الثقة: <span id="trust-value">50</span></h5>
+        <div class="progress" style="height: 30px;">
+            <div id="gauge" class="progress-bar gauge-bar bg-warning" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p id="gauge-message" class="text-center mt-2"></p>
+    </div>
+    
+    <hr>
+
+    <div id="game-content">
+        <h3 class="mb-4 text-center">ماذا تختار لتبدأ الحديث؟</h3>
+        
+        <p id="question-text" class="lead text-center mb-4"></p>
+
+        <div id="choices">
+            </div>
+    </div>
+    
+    <div id="game-over" class="text-center" style="display: none;">
+        <h2 class="mb-3">انتهت اللعبة!</h2>
+        <p class="lead"></p> 
+        <button class="btn btn-primary mt-3" onclick="location.reload()">ابدأ من جديد</button>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // --- Game Data and Logic ---
+
+    let trustLevel = 50; // Starting trust
+    const trustIncrement = 15; // Amount to increase on correct choice
+    const trustDecrement = 10; // Amount to decrease on wrong choice
+    let currentQuestionIndex = 0;
+
+    // Game questions and correct answers (A for first choice, B for second)
+    const questions = [
+        {
+            text: "موضوع للحديث: اختر موضوعًا للحديث معه الآن.",
+            choiceA: "نظريات المؤامرة حول الحرب العالمية الثانية",
+            choiceB: "نكهة التشيز كيك المفضلة لديه",
+            correct: 'A' // Correct: WW2 Conspiracy Theories
+        },
+        {
+            text: "موضوع للحديث: اختر موضوعًا ثانيًا.",
+            choiceA: "أفضل البرامج الإذاعية في أوائل التسعينات",
+            choiceB: "الاقتصاد التونسي",
+            correct: 'A' // Correct: Best radio show early 90s
+        },
+        {
+            text: "موضوع للحديث: اختر موضوعًا ثالثًا.",
+            choiceA: "الذكاء الاصطناعي وعملة البيتكوين",
+            choiceB: "صيد السمك",
+            correct: 'B' // Correct: Fishing
+        },
+        {
+            text: "موضوع للحديث: اختر موضوعًا أخيرًا.",
+            choiceA: "أفضل السيارات الكلاسيكية",
+            choiceB: "أفضل أماكن قضاء العطلات",
+            correct: 'A' // Correct: Best classic cars
+        }
+    ];
+
+    // --- DOM Elements ---
+    const trustValueSpan = document.getElementById('trust-value');
+    const gaugeBar = document.getElementById('gauge');
+    const gaugeMessageP = document.getElementById('gauge-message');
+    const questionTextP = document.getElementById('question-text');
+    const choicesDiv = document.getElementById('choices');
+    const gameOverDiv = document.getElementById('game-over');
+    const gameContentDiv = document.getElementById('game-content');
+    
+    // Elements for the final message display
+    const gameOverTitle = document.querySelector('#game-over h2'); 
+    const finalOutcomeMessage = document.querySelector('#game-over p.lead');
+
+    // --- Game Functions ---
+
+    /** Updates the visual trust gauge and value. */
+    function updateTrustGauge(isCorrect) {
+        if (isCorrect) {
+            trustLevel = Math.min(100, trustLevel + trustIncrement);
+            gaugeMessageP.innerHTML = `<span class="text-success">✅ ${trustIncrement}+! لقد أحسنت الاختيار.</span>`;
+        } else {
+            trustLevel = Math.max(0, trustLevel - trustDecrement);
+            gaugeMessageP.innerHTML = `<span class="text-danger">❌ ${trustDecrement}-! هذا لم يعجبه.</span>`;
+        }
+        
+        trustValueSpan.textContent = trustLevel;
+        gaugeBar.style.width = trustLevel + '%';
+        gaugeBar.setAttribute('aria-valuenow', trustLevel);
+
+        // Change gauge color based on trust level
+        gaugeBar.className = 'progress-bar gauge-bar';
+        if (trustLevel >= 75) {
+            gaugeBar.classList.add('bg-success');
+        } else if (trustLevel >= 40) {
+            gaugeBar.classList.add('bg-warning');
+        } else {
+            gaugeBar.classList.add('bg-danger');
+        }
+    }
+
+    /** Loads the next question or ends the game. */
+    function loadNextQuestion() {
+        if (currentQuestionIndex < questions.length) {
+            const q = questions[currentQuestionIndex];
+            questionTextP.textContent = q.text;
+            
+            choicesDiv.innerHTML = `
+                <button class="btn btn-outline-dark choice-btn" data-choice="A" onclick="handleChoice('A')">
+                    ${q.choiceA}
+                </button>
+                <button class="btn btn-outline-dark choice-btn" data-choice="B" onclick="handleChoice('B')">
+                    ${q.choiceB}
+                </button>
+            `;
+            gaugeMessageP.textContent = ''; // Clear previous message
+        } else {
+            endGame();
+        }
+    }
+
+    /** Handles a player's choice. */
+    window.handleChoice = function(choice) {
+        // Disable buttons temporarily to prevent double-clicking
+        document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
+
+        const q = questions[currentQuestionIndex];
+        const isCorrect = (choice === q.correct);
+        
+        updateTrustGauge(isCorrect);
+        
+        currentQuestionIndex++;
+        
+        // Wait a moment for the user to see the feedback before loading the next question
+        setTimeout(() => {
+            // Re-enable buttons if not game over
+            if (currentQuestionIndex < questions.length) {
+                document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = false);
+            }
+            loadNextQuestion();
+        }, 1500);
+    }
+
+    /** Displays the game over screen with success/failure message. */
+    function endGame() {
+        gameContentDiv.style.display = 'none';
+        gameOverDiv.style.display = 'block';
+
+        if (trustLevel >= 100) {
+            // Mission Successful!
+            gameOverTitle.textContent = "🥳 نجاح المهمة!";
+            gameOverTitle.classList.remove('text-danger');
+            gameOverTitle.classList.add('text-success');
+
+            finalOutcomeMessage.innerHTML = `لقد نجحت في تشتيت انتباه الأستاذ الشريف بشكل ممتاز! 
+                نقاط الثقة النهائية: <span class="text-success">${trustLevel}</span>`;
+
+        } else {
+            // Mission Failed
+            gameOverTitle.textContent = "😔 فشل المهمة!";
+            gameOverTitle.classList.remove('text-success');
+            gameOverTitle.classList.add('text-danger');
+
+            finalOutcomeMessage.innerHTML = `الأستاذ الشريف لم يكن مهتماً بالحديث، وذهب لتفقد الغرفة الأخرى. 
+                نقاط الثقة النهائية: <span class="text-danger">${trustLevel}</span>`;
+        }
+    }
+
+    // Initialize the game
+    loadNextQuestion();
+
+</script>
+
+</body>
+</html>
