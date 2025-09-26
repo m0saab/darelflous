@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Cracker - Wordle</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a202c;
+            --secondary-color: #4a5568;
+            --accent-color: #f6ad55;
+            --text-color: #e2e8f0;
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+            --tile-bg: #4a5568;
+            --correct: #48bb78;
+            --present: #f6ad55;
+            --absent: #4a5568;
+            --key-bg: #4a5568;
+            --key-text: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem 1rem;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+        }
+
+        .game-container {
+            width: 90%;
+            max-width: 600px;
+            padding: 2rem;
+            background-color: var(--secondary-color);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .step-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .game-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .game-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .restart-button {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        #timer {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .jewellery-images {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .jewellery-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .jewellery-image:hover {
+            transform: scale(1.1);
+        }
+
+        .progress-bar-container {
+            width: 80%;
+            height: 20px;
+            background-color: #2d3748;
+            border-radius: 10px;
+            margin-top: 1rem;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease-out;
+        }
+        
+        /* Wordle Styles */
+        .wordle-game-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #message-box {
+            height: 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .tile {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 2px solid var(--tile-bg);
+            border-radius: 0.25rem;
+            background-color: transparent;
+            transition: transform 0.2s ease-in-out, background-color 0.5s ease-in-out;
+            color: var(--text-color);
+        }
+
+        .tile.correct {
+            background-color: var(--correct);
+            border-color: var(--correct);
+            transform: scale(1.1);
+        }
+
+        .tile.present {
+            background-color: var(--present);
+            border-color: var(--present);
+        }
+
+        .tile.absent {
+            background-color: var(--absent);
+            border-color: var(--absent);
+        }
+
+        #keyboard {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .key {
+            padding: 1rem 0.5rem;
+            width: 30px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--key-bg);
+            color: var(--key-text);
+            border-radius: 0.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            user-select: none;
+            text-transform: uppercase;
+        }
+
+        .key:active {
+            transform: scale(0.95);
+        }
+
+        .key.correct {
+            background-color: var(--correct);
+        }
+
+        .key.present {
+            background-color: var(--present);
+        }
+
+        .key.absent {
+            background-color: var(--absent);
+        }
+
+        .wide-key {
+            flex-grow: 1;
+        }
+
+        .alarm-light {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            animation: none;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .alarm-light.active {
+            animation: alarm 0.5s infinite;
+        }
+
+        @keyframes alarm {
+            0%, 100% { background-color: rgba(245, 101, 101, 0.2); }
+            50% { background-color: rgba(66, 153, 225, 0.2); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="alarm-light" id="alarm-light"></div>
+
+<div class="game-container">
+    <div id="start-screen" class="step-display">
+        <h1>Safe Cracker</h1>
+        <h2>Jewel Heist Simulation</h2>
+        <p>Are you ready to prove you have what it takes to crack the safe?</p>
+        <button id="start-btn" class="game-button">Start Mission</button>
+    </div>
+
+    <div id="wordle-screen" class="hidden step-display wordle-game-area">
+        <h2>Step 1: Crack the Safe</h2>
+        <p>Guess the secret word. It is 4 letters long. You have 10 attempts.</p>
+        <div id="message-box"></div>
+        <div id="game-board"></div>
+        <div id="keyboard"></div>
+    </div>
+
+    <div id="step2-screen" class="hidden step-display">
+        <h2>Final Step: Collect the Cash</h2>
+        <p id="timer">00:20</p>
+        <h1 id="score">Cash: $0</h1>
+        <button id="click-btn" class="game-button">Click to Collect!</button>
+        <div id="progress-container" class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="hidden step-display">
+        <h2>Mission Passed</h2>
+        <h1 id="final-score"></h1>
+        <p>You have successfully completed the heist!</p>
+        <div class="jewellery-images">
+            <img class="jewellery-image" src="https://placehold.co/100x100/f6ad55/1a202c?text=Diamond" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'40\' fill=\'%23F6AD55\'/%3E%3C/svg%3E';" alt="Diamond">
+            <img class="jewellery-image" src="https://placehold.co/100x100/e2e8f0/1a202c?text=Necklace" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect x=\'10\' y=\'10\' width=\'80\' height=\'80\' fill=\'%23E2E8F0\'/%3E%3C/svg%3E';" alt="Necklace">
+            <img class="jewellery-image" src="https://placehold.co/100x100/48bb78/1a202c?text=Ruby" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Cpolygon points=\'50,10 90,90 10,90\' fill=\'%2348BB78\'/%3E%3C/svg%3E';" alt="Ruby">
+        </div>
+        <button id="restart-btn" class="game-button restart-button" onclick="window.location.reload()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const startScreen = document.getElementById('start-screen');
+    const wordleScreen = document.getElementById('wordle-screen');
+    const step2Screen = document.getElementById('step2-screen');
+    const endScreen = document.getElementById('end-screen');
+    const alarmLight = document.getElementById('alarm-light');
+
+    const startBtn = document.getElementById('start-btn');
+    const clickBtn = document.getElementById('click-btn');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const progressBar = document.getElementById('progress-bar');
+    const gameBoard = document.getElementById('game-board');
+    const messageBox = document.getElementById('message-box');
+    const keyboard = document.getElementById('keyboard');
+
+    const TARGET_WORD = 'keys';
+    const GUESS_LENGTH = TARGET_WORD.length;
+    const MAX_ATTEMPTS = 10;
+    let currentAttempt = 0;
+    let currentTile = 0;
+    let gameIsOver = false;
+
+    const keyboardLayout = [
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+        ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'backspace']
+    ];
+
+    let score = 0;
+    let timer = 20;
+    let timerInterval;
+
+    function showStep(stepId) {
+        const screens = [startScreen, wordleScreen, step2Screen, endScreen];
+        screens.forEach(screen => screen.classList.add('hidden'));
+        document.getElementById(stepId).classList.remove('hidden');
+    }
+
+    startBtn.addEventListener('click', () => {
+        showStep('wordle-screen');
+        createGameBoard();
+        createKeyboard();
+        showMessage('Guess the word!');
+    });
+
+    // Wordle Game Logic
+    function createGameBoard() {
+        gameBoard.style.gridTemplateColumns = `repeat(${GUESS_LENGTH}, 1fr)`;
+        for (let i = 0; i < MAX_ATTEMPTS * GUESS_LENGTH; i++) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.dataset.index = i;
+            gameBoard.appendChild(tile);
+        }
+    }
+
+    function createKeyboard() {
+        keyboardLayout.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.classList.add('keyboard-row');
+            row.forEach(key => {
+                const keyDiv = document.createElement('div');
+                keyDiv.classList.add('key');
+                keyDiv.textContent = key === 'enter' ? 'Enter' : (key === 'backspace' ? 'Back' : key);
+                if (key === 'enter' || key === 'backspace') {
+                    keyDiv.classList.add('wide-key');
+                }
+                keyDiv.dataset.key = key;
+                keyDiv.addEventListener('click', handleKeyClick);
+                rowDiv.appendChild(keyDiv);
+            });
+            keyboard.appendChild(rowDiv);
+        });
+    }
+
+    function handleKeyClick(event) {
+        if (gameIsOver) return;
+
+        const key = event.target.dataset.key;
+        handleInput(key);
+    }
+
+    function handleInput(key) {
+        if (key === 'backspace' && currentTile > currentAttempt * GUESS_LENGTH) {
+            currentTile--;
+            document.querySelector(`.tile[data-index="${currentTile}"]`).textContent = '';
+        } else if (key === 'enter' && (currentTile % GUESS_LENGTH === 0) && currentTile !== 0) {
+            checkGuess();
+        } else if (key.length === 1 && currentTile < (currentAttempt + 1) * GUESS_LENGTH) {
+            document.querySelector(`.tile[data-index="${currentTile}"]`).textContent = key;
+            currentTile++;
+        }
+    }
+
+    function checkGuess() {
+        const startIndex = currentAttempt * GUESS_LENGTH;
+        const guess = Array.from({ length: GUESS_LENGTH }, (_, i) => 
+            document.querySelector(`.tile[data-index="${startIndex + i}"]`).textContent
+        ).join('').toLowerCase();
+
+        if (guess.length !== GUESS_LENGTH) {
+            showMessage('Not enough letters!');
+            return;
+        }
+
+        const targetChars = TARGET_WORD.split('');
+        const guessChars = guess.split('');
+        const letterStatus = {};
+
+        // First pass: find correct letters (green) and mark them
+        guessChars.forEach((char, i) => {
+            if (char === targetChars[i]) {
+                document.querySelector(`.tile[data-index="${startIndex + i}"]`).classList.add('correct');
+                letterStatus[char] = 'correct';
+                targetChars[i] = null;
+            }
+        });
+
+        // Second pass: find present letters (yellow)
+        guessChars.forEach((char, i) => {
+            const tile = document.querySelector(`.tile[data-index="${startIndex + i}"]`);
+            if (!tile.classList.contains('correct')) {
+                const targetIndex = targetChars.indexOf(char);
+                if (targetIndex !== -1) {
+                    tile.classList.add('present');
+                    if (letterStatus[char] !== 'correct') {
+                        letterStatus[char] = 'present';
+                    }
+                    targetChars[targetIndex] = null;
+                } else {
+                    tile.classList.add('absent');
+                    if (!letterStatus[char]) {
+                         letterStatus[char] = 'absent';
+                    }
+                }
+            }
+        });
+
+        // Update keyboard colors
+        for (const key in letterStatus) {
+            const keyElement = document.querySelector(`[data-key="${key}"]`);
+            if (keyElement) {
+                if (letterStatus[key] === 'correct') {
+                    keyElement.classList.add('correct');
+                } else if (letterStatus[key] === 'present' && !keyElement.classList.contains('correct')) {
+                    keyElement.classList.add('present');
+                } else if (letterStatus[key] === 'absent' && !keyElement.classList.contains('correct') && !keyElement.classList.contains('present')) {
+                    keyElement.classList.add('absent');
+                }
+            }
+        }
+
+        currentAttempt++;
+
+        if (guess === TARGET_WORD) {
+            showMessage('You win! The safe is open.');
+            gameIsOver = true;
+            setTimeout(() => {
+                showStep('step2-screen');
+                startClickerGame();
+            }, 1000);
+        } else if (currentAttempt >= MAX_ATTEMPTS) {
+            showMessage(`You lose! The word was ${TARGET_WORD}.`);
+            gameIsOver = true;
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+    }
+
+    function showMessage(message) {
+        messageBox.textContent = message;
+    }
+    
+    // Clicker Game Logic
+    clickBtn.addEventListener('click', () => {
+        score += 2000;
+        scoreDisplay.textContent = `Cash: $${score}`;
+    });
+
+    function startClickerGame() {
+        timer = 20;
+        score = 0;
+        timerDisplay.textContent = `00:${timer.toString().padStart(2, '0')}`;
+        scoreDisplay.textContent = `Cash: $0`;
+        clickBtn.disabled = false;
+        
+        timerInterval = setInterval(() => {
+            timer--;
+            timerDisplay.textContent = `00:${timer.toString().padStart(2, '0')}`;
+            const progressPercentage = (timer / 20) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            if (timer <= 0) {
+                clearInterval(timerInterval);
+                clickBtn.disabled = true;
+                showEndScreen();
+            }
+        }, 1000);
+    }
+
+    function showEndScreen() {
+        finalScoreDisplay.textContent = `You got $${score}!`;
+        alarmLight.classList.add('active');
+        showStep('end-screen');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (gameIsOver) return;
+        const key = e.key.toLowerCase();
+        if (keyboardLayout.flat().includes(key) || key === 'enter' || key === 'backspace') {
+            handleInput(key);
+        }
+    });
+
+</script>
+
+</body>
+</html>
