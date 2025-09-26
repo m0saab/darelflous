@@ -14,6 +14,29 @@
     .notch{height:32px;display:flex;align-items:center;justify-content:center}
     .screen{flex:1;background:var(--screen);border-radius:22px;padding:18px;overflow:hidden;position:relative}
 
+    /* hacker screen */
+    .hacker-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--screen);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: monospace;
+      padding: 18px;
+      z-index: 10;
+    }
+    .hacker-output {
+      font-size: 14px;
+      color: #39ff14; /* Light green */
+      white-space: pre-wrap;
+      max-height: 100%;
+      overflow: auto; /* Use auto to allow scrolling if too much content */
+      width: 100%; /* Take full width of parent */
+      text-align: left;
+    }
+
     /* lock screen */
     .lock-center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
     .time{font-size:48px;font-weight:600}
@@ -37,65 +60,13 @@
 
     /* gallery */
     .overlay{position:absolute;inset:0;background:rgba(2,6,23,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px}
-    .panel{width:100%;height:100%;background:linear-gradient(180deg,#08101a,#04101a);border-radius:16px;padding:14px;overflow:auto;position:relative}
+    .panel{width:100%;height:100%;background:linear-gradient(180deg,#08101a,#04101a);border-radius:16px;padding:14px;overflow:auto}
     .panel .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;cursor:pointer}
-    .thumb:hover {box-shadow: 0 0 0 2px var(--accent);} /* Visual feedback for hover/hold */
+    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
 
     /* CCTV panel */
     .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
-
-    /* fake hacker screen styles */
-    #hackerScreen{
-      position:absolute;
-      inset:0;
-      background:var(--screen);
-      display:flex;
-      flex-direction:column;
-      padding:18px;
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 14px;
-      color: #c0f0c0; /* Light Green */
-      overflow: hidden;
-      z-index: 10;
-    }
-    #hackerOutput{
-      white-space: pre-wrap;
-      overflow: hidden;
-    }
-    .glitch{
-      position: absolute;
-      color: red;
-      opacity: 0.1;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 72px;
-      pointer-events: none;
-    }
-
-    /* Share Menu styles */
-    .share-menu {
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: #1e293b; /* Darker background for the menu */
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        padding: 8px;
-        min-width: 150px;
-        z-index: 20;
-        display: none;
-    }
-    .share-menu div {
-        padding: 8px 12px;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-    .share-menu div:hover {
-        background: #334155;
-    }
 
     /* small helpers */
     .btn{text-transform:uppercase;font-size:12px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);cursor:pointer}
@@ -108,13 +79,11 @@
   <div class="phone" role="application" aria-label="Phone mockup">
     <div class="notch"></div>
     <div class="screen">
-
-            <div id="hackerScreen">
-        <div id="hackerOutput"></div>
-        <div class="glitch" id="glitchEffect"></div>
+            <div class="hacker-screen" id="hackerScreen">
+        <div class="hacker-output" id="hackerOutput"></div>
       </div>
 
-            <div class="lock-screen lock-center" id="lockScreen" style="display:none">
+            <div class="lock-screen lock-center" id="lockScreen" style="display:none;">
         <div style="text-align:center">
           <div class="time" id="time">09:41</div>
           <div class="date" id="date">Thursday, Sep 26</div>
@@ -144,7 +113,7 @@
         </div>
       </div>
 
-            <div class="keypad" id="keypad" style="display:none">
+            <div class="keypad" id="keypad" style="display:none;">
         <div class="key" data-key="1">1</div>
         <div class="key" data-key="2">2</div>
         <div class="key" data-key="3">3</div>
@@ -164,11 +133,6 @@
           <div class="top"><div style="font-weight:600">Gallery</div><div><button class="btn" id="closeGallery">Close</button></div></div>
           <div class="grid" id="galleryGrid">
                       </div>
-            <div class="share-menu" id="shareMenu">
-                <div>Share via Bluetooth</div>
-                <div>Share via Email</div>
-                <div id="shareNetworkOption">Send with Network</div>
-            </div>
         </div>
       </div>
 
@@ -185,7 +149,6 @@
   <script>
     const CORRECT_PIN = '1966';
     const MAX_DIGITS = 4;
-    const FAKE_HACK_DURATION = 5000; // 5 seconds for the hacker screen
 
     const dots = document.querySelectorAll('.dot');
     const keys = document.querySelectorAll('.key');
@@ -202,84 +165,8 @@
     const galleryGrid = document.getElementById('galleryGrid');
     const hackerScreen = document.getElementById('hackerScreen');
     const hackerOutput = document.getElementById('hackerOutput');
-    const shareMenu = document.getElementById('shareMenu');
-    const shareNetworkOption = document.getElementById('shareNetworkOption');
 
     let entered = '';
-    let typingInterval;
-    let wordInterval;
-    let wordToType = "SYSTEM";
-    let wordIndex = 0;
-    let longPressTimer;
-
-    // --- Fake Hacker Screen Logic ---
-
-    function getRandomChar() {
-        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const index = Math.floor(Math.random() * chars.length);
-        return chars.charAt(index);
-    }
-
-    function typeRandomData() {
-        let output = hackerOutput.innerHTML;
-        const newChar = getRandomChar();
-        output += newChar;
-        // Keep only the last 30 lines (approx)
-        const lines = output.split('\n');
-        if (lines.length > 30) {
-            output = lines.slice(lines.length - 30).join('\n');
-        }
-        hackerOutput.innerHTML = output;
-
-        // Add a random newline sometimes to make it look like separate lines of output
-        if (Math.random() < 0.1) {
-             hackerOutput.innerHTML += '\n';
-        }
-        // Scroll to the bottom
-        hackerOutput.scrollTop = hackerOutput.scrollHeight;
-    }
-
-    function typeWord() {
-        if (wordIndex < wordToType.length) {
-            // Add a small pause/delay for the next letter
-            setTimeout(() => {
-                hackerOutput.innerHTML += `<span style="color:red">${wordToType[wordIndex]}</span>`;
-                wordIndex++;
-            }, Math.random() * 200 + 50); // Small random delay between letters
-        } else {
-            clearInterval(wordInterval);
-            hackerOutput.innerHTML += '... **[HACK SUCCESS]**';
-            // Transition to the lock screen after the word is complete
-            setTimeout(showLockScreen, 1000);
-        }
-    }
-
-    function startHackerScreen() {
-        typingInterval = setInterval(typeRandomData, 50); // Type every 50ms
-        setTimeout(() => {
-            clearInterval(typingInterval); // Stop random data after 4-5 seconds
-            wordInterval = setInterval(typeWord, 300); // Start typing SYSTEM
-        }, 4500); // 4.5 seconds before starting to type SYSTEM
-
-        // Automatically hide and show lock screen after FAKE_HACK_DURATION
-        setTimeout(() => {
-            if (hackerScreen.style.display !== 'none') {
-                showLockScreen();
-            }
-        }, FAKE_HACK_DURATION + 1500); // Total duration is ~6 seconds (4.5s random + 1s SYSTEM + 0.5s pause)
-    }
-
-    function showLockScreen() {
-        hackerScreen.style.display = 'none';
-        lockScreen.style.display = 'flex';
-        keypad.style.display = 'grid'; // Keypad must be grid for CSS to work
-    }
-
-    // Initialize the hacker screen on load
-    startHackerScreen();
-
-
-    // --- PIN and Home Screen Logic (Original Logic Modified) ---
 
     keys.forEach(k=>{
       k.addEventListener('click', ()=> handleKey(k.dataset.key));
@@ -341,76 +228,20 @@
     }
     tickTime(); setInterval(tickTime, 30*1000);
 
-    // --- Gallery Logic (Original Logic Modified for Long Press) ---
-
-    function showShareMenu(x, y, filename) {
-        shareMenu.style.left = `${x}px`;
-        shareMenu.style.top = `${y}px`;
-        shareMenu.style.display = 'block';
-        // Optional: show the filename in a title or log
-        console.log(`Context menu for: ${filename}`);
-        // Highlight the network option as requested
-        shareNetworkOption.style.color = '#ff6b6b'; // Red color for "Network"
-        shareNetworkOption.style.fontWeight = 'bold';
-    }
-
-    function hideShareMenu() {
-        shareMenu.style.display = 'none';
-        shareNetworkOption.style.color = ''; // Reset color
-        shareNetworkOption.style.fontWeight = ''; // Reset font weight
-    }
-
-    function handleImageLongPress(e) {
-        // Only trigger for image 1.jpg
-        if (e.target.dataset.filename === '1.jpg') {
-            // Position the menu relative to the click/touch point, but within the panel
-            const panelRect = e.target.closest('.panel').getBoundingClientRect();
-            const clickX = e.clientX - panelRect.left;
-            const clickY = e.clientY - panelRect.top;
-            showShareMenu(clickX, clickY, '1.jpg');
-            e.preventDefault(); // Prevent default context menu
-        }
-    }
-
-
     function loadGallery(){
       galleryGrid.innerHTML = '';
-      hideShareMenu(); // Hide menu when opening gallery
       for(let i=1;i<=6;i++){
         const img = document.createElement('img');
         img.src = `assets/${i}.jpg`;
         img.alt = `Photo ${i}`;
-        img.dataset.filename = `${i}.jpg`; // Store filename for easy check
         img.className = 'thumb';
-
-        // Add event listeners for "long press"
-        // 1. Mouse down/Touch start
-        img.addEventListener('mousedown', (e) => {
-            if (e.button === 0 && img.dataset.filename === '1.jpg') {
-                longPressTimer = setTimeout(() => handleImageLongPress(e), 500); // 500ms for long press
-            }
-        });
-        img.addEventListener('touchstart', (e) => {
-            if (img.dataset.filename === '1.jpg') {
-                longPressTimer = setTimeout(() => handleImageLongPress(e.touches[0]), 500);
-            }
-        });
-
-        // 2. Clear timer on mouse up/Touch end/Mouse move (to cancel the "hold")
-        img.addEventListener('mouseup', () => clearTimeout(longPressTimer));
-        img.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
-        img.addEventListener('touchend', () => clearTimeout(longPressTimer));
-        img.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-
-
-        img.addEventListener('click', ()=> openImageFull(img.src)); // Standard click to view full
+        img.addEventListener('click', ()=> openImageFull(img.src));
         galleryGrid.appendChild(img);
       }
     }
 
     function openImageFull(src){
       window.open(src, '_blank');
-      hideShareMenu(); // Hide menu if image is opened full
     }
 
     appGallery.addEventListener('click', ()=>{
@@ -421,16 +252,7 @@
     closeGallery.addEventListener('click', ()=>{
       galleryOverlay.style.display = 'none';
       galleryOverlay.setAttribute('aria-hidden','true');
-      hideShareMenu();
     });
-
-    // Hide the share menu when clicking anywhere else on the overlay
-    galleryOverlay.addEventListener('click', (e) => {
-        if (!shareMenu.contains(e.target) && !e.target.classList.contains('thumb')) {
-            hideShareMenu();
-        }
-    });
-
 
     appCCTV.addEventListener('click', ()=>{
       cctvOverlay.style.display = 'flex';
@@ -452,6 +274,66 @@
 
     appGallery.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appGallery.click(); });
     appCCTV.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appCCTV.click(); });
+
+    /* HACKER SCREEN LOGIC */
+    const HACK_WORD = 'system';
+    let hackWordIndex = 0;
+    let randomGenerationInterval;
+
+    function generateRandomString(length = 20) {
+      let result = '';
+      const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+      for (let i = 0; i < length - 1; i++) {
+        result += characters.charAt(Math.floor(Math.random() * 10)); // Only numbers for most chars
+      }
+      // Add one random letter at the end
+      result += characters.charAt(Math.floor(Math.random() * (characters.length - 10)) + 10);
+      return result;
+    }
+
+    function runRandomGeneration() {
+      hackerOutput.textContent += generateRandomString() + '\n';
+      // Scroll to bottom
+      hackerOutput.scrollTop = hackerOutput.scrollHeight;
+    }
+
+    function startHackerSequence() {
+      // Start random generation every 50ms
+      randomGenerationInterval = setInterval(runRandomGeneration, 50);
+
+      // After 4 seconds, stop random generation and start typing 'system'
+      setTimeout(() => {
+        clearInterval(randomGenerationInterval);
+        // Add a prompt or similar indicator
+        hackerOutput.textContent += '> Attempting to breach security...\n';
+        setTimeout(typeHackWord, 500); // Small pause before typing
+      }, 4000); // 4 seconds of random text
+
+    }
+
+    function typeHackWord() {
+      if (hackWordIndex < HACK_WORD.length) {
+        // Append the next letter
+        hackerOutput.textContent += HACK_WORD[hackWordIndex];
+        hackWordIndex++;
+        // Schedule the next letter after a delay (400-500ms per letter)
+        setTimeout(typeHackWord, 450);
+      } else {
+        // Once done typing 'system'
+        hackerOutput.textContent += '\n\n>> ACCESS GRANTED. Loading phone interface...\n';
+        // Transition to the phone's lock screen
+        setTimeout(showLockScreen, 1500); // Pause before transition
+      }
+    }
+
+    function showLockScreen() {
+      hackerScreen.style.display = 'none';
+      lockScreen.style.display = 'flex';
+      keypad.style.display = 'grid';
+    }
+
+    // Start the sequence when the page loads
+    document.addEventListener('DOMContentLoaded', startHackerSequence);
   </script>
 </body>
 </html>
