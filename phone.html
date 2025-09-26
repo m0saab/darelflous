@@ -1,339 +1,255 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Phone Mockup — Guess the PIN</title>
-  <style>
-    :root{--bg:#0b0b0f;--phone:#0f1720;--screen:#0b1220;--accent:#1fb6ff;--muted:#97a0b3}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#06060a 0%, #0e1220 100%);color:#e6eef8}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Phone Mockup — Guess the PIN</title>
+  <style>
+    :root{--bg:#0b0b0f;--phone:#0f1720;--screen:#0b1220;--accent:#1fb6ff;--muted:#97a0b3}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#06060a 0%, #0e1220 100%);color:#e6eef8}
 
-    /* phone */
-    .phone{width:360px;height:720px;border-radius:36px;background:linear-gradient(180deg,#0b1220,#06101a);box-shadow:0 20px 60px rgba(2,6,23,.7), inset 0 1px 0 rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column}
-    .notch{height:32px;display:flex;align-items:center;justify-content:center}
-    .screen{flex:1;background:var(--screen);border-radius:22px;padding:18px;overflow:hidden;position:relative}
+    /* phone */
+    .phone{width:360px;height:720px;border-radius:36px;background:linear-gradient(180deg,#0b1220,#06101a);box-shadow:0 20px 60px rgba(2,6,23,.7), inset 0 1px 0 rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column}
+    .notch{height:32px;display:flex;align-items:center;justify-content:center}
+    .screen{flex:1;background:var(--screen);border-radius:22px;padding:18px;overflow:hidden;position:relative}
 
-    /* hacker screen */
-    .hacker-screen {
-      position: absolute;
-      inset: 0;
-      background: var(--screen);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      font-family: monospace;
-      padding: 18px;
-      z-index: 10;
-    }
-    .hacker-output {
-      font-size: 14px;
-      color: #39ff14; /* Light green */
-      white-space: pre-wrap;
-      max-height: 100%;
-      overflow: auto; /* Use auto to allow scrolling if too much content */
-      width: 100%; /* Take full width of parent */
-      text-align: left;
-    }
+    /* lock screen */
+    .lock-center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+    .time{font-size:48px;font-weight:600}
+    .date{color:var(--muted)}
+    .pin-dots{display:flex;gap:12px}
+    .dot{width:12px;height:12px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,.18)}
+    .dot.filled{background:var(--accent);border-color:transparent}
 
-    /* lock screen */
-    .lock-center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-    .time{font-size:48px;font-weight:600}
-    .date{color:var(--muted)}
-    .pin-dots{display:flex;gap:12px}
-    .dot{width:12px;height:12px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,.18)}
-    .dot.filled{background:var(--accent);border-color:transparent}
+    /* keypad */
+    .keypad{position:absolute;left:0;right:0;bottom:0;padding:18px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.3));display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .key{background:rgba(255,255,255,.04);padding:14px;border-radius:12px;text-align:center;font-size:18px;user-select:none;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+    .key:active{transform:translateY(1px)}
+    .key.small{grid-column:span:3}
 
-    /* keypad */
-    .keypad{position:absolute;left:0;right:0;bottom:0;padding:18px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.3));display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .key{background:rgba(255,255,255,.04);padding:14px;border-radius:12px;text-align:center;font-size:18px;user-select:none;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
-    .key:active{transform:translateY(1px)}
-    .key.small{grid-column:span:3}
+    /* home */
+    .home{display:none;height:100%;width:100%;flex-direction:column}
+    .app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px}
+    .app{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+    .app .icon{width:64px;height:64px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));display:flex;align-items:center;justify-content:center;font-size:28px}
+    .label{font-size:12px;color:var(--muted);text-align:center}
 
-    /* home */
-    .home{display:none;height:100%;width:100%;flex-direction:column}
-    .app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px}
-    .app{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
-    .app .icon{width:64px;height:64px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));display:flex;align-items:center;justify-content:center;font-size:28px}
-    .label{font-size:12px;color:var(--muted);text-align:center}
+    /* gallery */
+    .overlay{position:absolute;inset:0;background:rgba(2,6,23,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px}
+    .panel{width:100%;height:100%;background:linear-gradient(180deg,#08101a,#04101a);border-radius:16px;padding:14px;overflow:auto}
+    .panel .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
 
-    /* gallery */
-    .overlay{position:absolute;inset:0;background:rgba(2,6,23,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px}
-    .panel{width:100%;height:100%;background:linear-gradient(180deg,#08101a,#04101a);border-radius:16px;padding:14px;overflow:auto}
-    .panel .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
+    /* CCTV panel */
+    .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
 
-    /* CCTV panel */
-    .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
+    /* small helpers */
+    .btn{text-transform:uppercase;font-size:12px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);cursor:pointer}
 
-    /* small helpers */
-    .btn{text-transform:uppercase;font-size:12px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);cursor:pointer}
-
-    /* responsive */
-    @media (max-width:420px){.phone{transform:scale(.9)}}
-  </style>
+    /* responsive */
+    @media (max-width:420px){.phone{transform:scale(.9)}}
+  </style>
 </head>
 <body>
-  <div class="phone" role="application" aria-label="Phone mockup">
-    <div class="notch"></div>
-    <div class="screen">
-            <div class="hacker-screen" id="hackerScreen">
-        <div class="hacker-output" id="hackerOutput"></div>
-      </div>
+  <div class="phone" role="application" aria-label="Phone mockup">
+    <div class="notch"></div>
+    <div class="screen">
+      <!-- LOCK SCREEN -->
+      <div class="lock-screen lock-center" id="lockScreen">
+        <div style="text-align:center">
+          <div class="time" id="time">09:41</div>
+          <div class="date" id="date">Thursday, Sep 26</div>
+        </div>
+        <div style="text-align:center">
+          <div style="margin-bottom:6px;color:var(--muted)">Enter PIN</div>
+          <div class="pin-dots" id="dots">
+            <div class="dot" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+            <div class="dot" data-index="3"></div>
+          </div>
+        </div>
+      </div>
 
-            <div class="lock-screen lock-center" id="lockScreen" style="display:none;">
-        <div style="text-align:center">
-          <div class="time" id="time">09:41</div>
-          <div class="date" id="date">Thursday, Sep 26</div>
-        </div>
-        <div style="text-align:center">
-          <div style="margin-bottom:6px;color:var(--muted)">Enter PIN</div>
-          <div class="pin-dots" id="dots">
-            <div class="dot" data-index="0"></div>
-            <div class="dot" data-index="1"></div>
-            <div class="dot" data-index="2"></div>
-            <div class="dot" data-index="3"></div>
-          </div>
-        </div>
-      </div>
+      <!-- HOME SCREEN -->
+      <div class="home" id="homeScreen" aria-hidden="true">
+        <div style="padding:14px 18px;color:var(--muted)">Home</div>
+        <div class="app-grid">
+          <div class="app" id="appCCTV" tabindex="0" role="button" aria-label="CCTV app">
+            <div class="icon">📹</div>
+            <div class="label">CCTV</div>
+          </div>
+          <div class="app" id="appGallery" tabindex="0" role="button" aria-label="Gallery app">
+            <div class="icon">🖼️</div>
+            <div class="label">Gallery</div>
+          </div>
+        </div>
+      </div>
 
-            <div class="home" id="homeScreen" aria-hidden="true">
-        <div style="padding:14px 18px;color:var(--muted)">Home</div>
-        <div class="app-grid">
-          <div class="app" id="appCCTV" tabindex="0" role="button" aria-label="CCTV app">
-            <div class="icon">📹</div>
-            <div class="label">CCTV</div>
-          </div>
-          <div class="app" id="appGallery" tabindex="0" role="button" aria-label="Gallery app">
-            <div class="icon">🖼️</div>
-            <div class="label">Gallery</div>
-          </div>
-        </div>
-      </div>
+      <!-- KEYPAD -->
+      <div class="keypad" id="keypad">
+        <div class="key" data-key="1">1</div>
+        <div class="key" data-key="2">2</div>
+        <div class="key" data-key="3">3</div>
+        <div class="key" data-key="4">4</div>
+        <div class="key" data-key="5">5</div>
+        <div class="key" data-key="6">6</div>
+        <div class="key" data-key="7">7</div>
+        <div class="key" data-key="8">8</div>
+        <div class="key" data-key="9">9</div>
+        <div class="key" data-key="*">*</div>
+        <div class="key" data-key="0">0</div>
+        <div class="key" id="keyBack">⌫</div>
+      </div>
 
-            <div class="keypad" id="keypad" style="display:none;">
-        <div class="key" data-key="1">1</div>
-        <div class="key" data-key="2">2</div>
-        <div class="key" data-key="3">3</div>
-        <div class="key" data-key="4">4</div>
-        <div class="key" data-key="5">5</div>
-        <div class="key" data-key="6">6</div>
-        <div class="key" data-key="7">7</div>
-        <div class="key" data-key="8">8</div>
-        <div class="key" data-key="9">9</div>
-        <div class="key" data-key="*">*</div>
-        <div class="key" data-key="0">0</div>
-        <div class="key" id="keyBack">⌫</div>
-      </div>
+      <!-- OVERLAYS -->
+      <div class="overlay" id="galleryOverlay" aria-hidden="true">
+        <div class="panel">
+          <div class="top"><div style="font-weight:600">Gallery</div><div><button class="btn" id="closeGallery">Close</button></div></div>
+          <div class="grid" id="galleryGrid">
+            <!-- thumbnails inserted by JS -->
+          </div>
+        </div>
+      </div>
 
-            <div class="overlay" id="galleryOverlay" aria-hidden="true">
-        <div class="panel">
-          <div class="top"><div style="font-weight:600">Gallery</div><div><button class="btn" id="closeGallery">Close</button></div></div>
-          <div class="grid" id="galleryGrid">
-                      </div>
-        </div>
-      </div>
+      <div class="overlay" id="cctvOverlay" aria-hidden="true">
+        <div class="panel">
+          <div class="top"><div style="font-weight:600">CCTV</div><div><button class="btn" id="closeCCTV">Close</button></div></div>
+          <div class="cctv-screen">Live feed unavailable — placeholder camera view</div>
+        </div>
+      </div>
 
-      <div class="overlay" id="cctvOverlay" aria-hidden="true">
-        <div class="panel">
-          <div class="top"><div style="font-weight:600">CCTV</div><div><button class="btn" id="closeCCTV">Close</button></div></div>
-          <div class="cctv-screen">Live feed unavailable — placeholder camera view</div>
-        </div>
-      </div>
+    </div>
+  </div>
 
-    </div>
-  </div>
+  <script>
+    const CORRECT_PIN = '1966';
+    const MAX_DIGITS = 4;
 
-  <script>
-    const CORRECT_PIN = '1966';
-    const MAX_DIGITS = 4;
+    const dots = document.querySelectorAll('.dot');
+    const keys = document.querySelectorAll('.key');
+    const back = document.getElementById('keyBack');
+    const keypad = document.getElementById('keypad');
+    const lockScreen = document.getElementById('lockScreen');
+    const homeScreen = document.getElementById('homeScreen');
+    const appGallery = document.getElementById('appGallery');
+    const appCCTV = document.getElementById('appCCTV');
+    const galleryOverlay = document.getElementById('galleryOverlay');
+    const closeGallery = document.getElementById('closeGallery');
+    const cctvOverlay = document.getElementById('cctvOverlay');
+    const closeCCTV = document.getElementById('closeCCTV');
+    const galleryGrid = document.getElementById('galleryGrid');
 
-    const dots = document.querySelectorAll('.dot');
-    const keys = document.querySelectorAll('.key');
-    const back = document.getElementById('keyBack');
-    const keypad = document.getElementById('keypad');
-    const lockScreen = document.getElementById('lockScreen');
-    const homeScreen = document.getElementById('homeScreen');
-    const appGallery = document.getElementById('appGallery');
-    const appCCTV = document.getElementById('appCCTV');
-    const galleryOverlay = document.getElementById('galleryOverlay');
-    const closeGallery = document.getElementById('closeGallery');
-    const cctvOverlay = document.getElementById('cctvOverlay');
-    const closeCCTV = document.getElementById('closeCCTV');
-    const galleryGrid = document.getElementById('galleryGrid');
-    const hackerScreen = document.getElementById('hackerScreen');
-    const hackerOutput = document.getElementById('hackerOutput');
+    let entered = '';
 
-    let entered = '';
+    keys.forEach(k=>{
+      k.addEventListener('click', ()=> handleKey(k.dataset.key));
+    });
+    back.addEventListener('click', ()=>{
+      entered = entered.slice(0,-1);
+      refreshDots();
+    });
 
-    keys.forEach(k=>{
-      k.addEventListener('click', ()=> handleKey(k.dataset.key));
-    });
-    back.addEventListener('click', ()=>{
-      entered = entered.slice(0,-1);
-      refreshDots();
-    });
+    function handleKey(key){
+      if(key === undefined) return;
+      if(key === '*' ) return;
+      if(key === '⌫') return;
+      if(entered.length >= MAX_DIGITS) return;
+      entered += key;
+      refreshDots();
+      if(entered.length === MAX_DIGITS) checkPin();
+    }
 
-    function handleKey(key){
-      if(key === undefined) return;
-      if(key === '*' ) return;
-      if(key === '⌫') return;
-      if(entered.length >= MAX_DIGITS) return;
-      entered += key;
-      refreshDots();
-      if(entered.length === MAX_DIGITS) checkPin();
-    }
+    function refreshDots(){
+      dots.forEach((d,i)=>{
+        d.classList.toggle('filled', i < entered.length);
+      });
+    }
 
-    function refreshDots(){
-      dots.forEach((d,i)=>{
-        d.classList.toggle('filled', i < entered.length);
-      });
-    }
+    function checkPin(){
+      if(entered === CORRECT_PIN){
+        unlock();
+      } else {
+        shake();
+        entered = '';
+        setTimeout(refreshDots, 250);
+      }
+    }
 
-    function checkPin(){
-      if(entered === CORRECT_PIN){
-        unlock();
-      } else {
-        shake();
-        entered = '';
-        setTimeout(refreshDots, 250);
-      }
-    }
+    function shake(){
+      lockScreen.animate([
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-12px)' },
+        { transform: 'translateX(12px)' },
+        { transform: 'translateX(0)' }
+      ],{ duration: 400, iterations: 1 });
+    }
 
-    function shake(){
-      lockScreen.animate([
-        { transform: 'translateX(0)' },
-        { transform: 'translateX(-12px)' },
-        { transform: 'translateX(12px)' },
-        { transform: 'translateX(0)' }
-      ],{ duration: 400, iterations: 1 });
-    }
+    function unlock(){
+      lockScreen.style.display = 'none';
+      keypad.style.display = 'none';
+      homeScreen.style.display = 'flex';
+      homeScreen.setAttribute('aria-hidden','false');
+    }
 
-    function unlock(){
-      lockScreen.style.display = 'none';
-      keypad.style.display = 'none';
-      homeScreen.style.display = 'flex';
-      homeScreen.setAttribute('aria-hidden','false');
-    }
+    function tickTime(){
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      document.getElementById('time').textContent = hh + ':' + mm;
+      const options = { weekday: 'long', month:'short', day:'numeric' };
+      document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
+    }
+    tickTime(); setInterval(tickTime, 30*1000);
 
-    function tickTime(){
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2,'0');
-      const mm = String(now.getMinutes()).padStart(2,'0');
-      document.getElementById('time').textContent = hh + ':' + mm;
-      const options = { weekday: 'long', month:'short', day:'numeric' };
-      document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
-    }
-    tickTime(); setInterval(tickTime, 30*1000);
+    function loadGallery(){
+      galleryGrid.innerHTML = '';
+      for(let i=1;i<=6;i++){
+        const img = document.createElement('img');
+        img.src = `assets/${i}.jpg`;
+        img.alt = `Photo ${i}`;
+        img.className = 'thumb';
+        img.addEventListener('click', ()=> openImageFull(img.src));
+        galleryGrid.appendChild(img);
+      }
+    }
 
-    function loadGallery(){
-      galleryGrid.innerHTML = '';
-      for(let i=1;i<=6;i++){
-        const img = document.createElement('img');
-        img.src = `assets/${i}.jpg`;
-        img.alt = `Photo ${i}`;
-        img.className = 'thumb';
-        img.addEventListener('click', ()=> openImageFull(img.src));
-        galleryGrid.appendChild(img);
-      }
-    }
+    function openImageFull(src){
+      window.open(src, '_blank');
+    }
 
-    function openImageFull(src){
-      window.open(src, '_blank');
-    }
+    appGallery.addEventListener('click', ()=>{
+      galleryOverlay.style.display = 'flex';
+      galleryOverlay.setAttribute('aria-hidden','false');
+      loadGallery();
+    });
+    closeGallery.addEventListener('click', ()=>{
+      galleryOverlay.style.display = 'none';
+      galleryOverlay.setAttribute('aria-hidden','true');
+    });
 
-    appGallery.addEventListener('click', ()=>{
-      galleryOverlay.style.display = 'flex';
-      galleryOverlay.setAttribute('aria-hidden','false');
-      loadGallery();
-    });
-    closeGallery.addEventListener('click', ()=>{
-      galleryOverlay.style.display = 'none';
-      galleryOverlay.setAttribute('aria-hidden','true');
-    });
+    appCCTV.addEventListener('click', ()=>{
+      cctvOverlay.style.display = 'flex';
+      cctvOverlay.setAttribute('aria-hidden','false');
+    });
+    closeCCTV.addEventListener('click', ()=>{
+      cctvOverlay.style.display = 'none';
+      cctvOverlay.setAttribute('aria-hidden','true');
+    });
 
-    appCCTV.addEventListener('click', ()=>{
-      cctvOverlay.style.display = 'flex';
-      cctvOverlay.setAttribute('aria-hidden','false');
-    });
-    closeCCTV.addEventListener('click', ()=>{
-      cctvOverlay.style.display = 'none';
-      cctvOverlay.setAttribute('aria-hidden','true');
-    });
+    window.addEventListener('keydown', (e)=>{
+      if(document.getElementById('lockScreen').style.display === 'none') return;
+      if(e.key >= '0' && e.key <= '9'){
+        handleKey(e.key);
+      } else if(e.key === 'Backspace'){
+        entered = entered.slice(0,-1); refreshDots();
+      }
+    });
 
-    window.addEventListener('keydown', (e)=>{
-      if(document.getElementById('lockScreen').style.display === 'none') return;
-      if(e.key >= '0' && e.key <= '9'){
-        handleKey(e.key);
-      } else if(e.key === 'Backspace'){
-        entered = entered.slice(0,-1); refreshDots();
-      }
-    });
-
-    appGallery.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appGallery.click(); });
-    appCCTV.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appCCTV.click(); });
-
-    /* HACKER SCREEN LOGIC */
-    const HACK_WORD = 'system';
-    let hackWordIndex = 0;
-    let randomGenerationInterval;
-
-    function generateRandomString(length = 20) {
-      let result = '';
-      const characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-      for (let i = 0; i < length - 1; i++) {
-        result += characters.charAt(Math.floor(Math.random() * 10)); // Only numbers for most chars
-      }
-      // Add one random letter at the end
-      result += characters.charAt(Math.floor(Math.random() * (characters.length - 10)) + 10);
-      return result;
-    }
-
-    function runRandomGeneration() {
-      hackerOutput.textContent += generateRandomString() + '\n';
-      // Scroll to bottom
-      hackerOutput.scrollTop = hackerOutput.scrollHeight;
-    }
-
-    function startHackerSequence() {
-      // Start random generation every 50ms
-      randomGenerationInterval = setInterval(runRandomGeneration, 50);
-
-      // After 4 seconds, stop random generation and start typing 'system'
-      setTimeout(() => {
-        clearInterval(randomGenerationInterval);
-        // Add a prompt or similar indicator
-        hackerOutput.textContent += '> Attempting to breach security...\n';
-        setTimeout(typeHackWord, 500); // Small pause before typing
-      }, 4000); // 4 seconds of random text
-
-    }
-
-    function typeHackWord() {
-      if (hackWordIndex < HACK_WORD.length) {
-        // Append the next letter
-        hackerOutput.textContent += HACK_WORD[hackWordIndex];
-        hackWordIndex++;
-        // Schedule the next letter after a delay (400-500ms per letter)
-        setTimeout(typeHackWord, 450);
-      } else {
-        // Once done typing 'system'
-        hackerOutput.textContent += '\n\n>> ACCESS GRANTED. Loading phone interface...\n';
-        // Transition to the phone's lock screen
-        setTimeout(showLockScreen, 1500); // Pause before transition
-      }
-    }
-
-    function showLockScreen() {
-      hackerScreen.style.display = 'none';
-      lockScreen.style.display = 'flex';
-      keypad.style.display = 'grid';
-    }
-
-    // Start the sequence when the page loads
-    document.addEventListener('DOMContentLoaded', startHackerSequence);
-  </script>
+    appGallery.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appGallery.click(); });
+    appCCTV.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') appCCTV.click(); });
+  </script>
 </body>
 </html>
