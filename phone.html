@@ -147,7 +147,7 @@
   <script>
     const CORRECT_PIN = '1966';
     const MAX_DIGITS = 4;
-    const HACK_CLICKS_NEEDED = 30; // Number of clicks required to fill the bar
+    const HACK_CLICKS_NEEDED = 30; // Clicks required
 
     // DOM elements for PIN screen
     const dots = document.querySelectorAll('.dot');
@@ -211,7 +211,7 @@
         appendTerminal('[SUCCESS] PIN hash cracked. Accessing Lock Screen...');
         hackButton.textContent = 'ACCESS GRANTED';
         hackButton.disabled = true;
-        setTimeout(showLockScreen, 1500); // Wait a bit before showing lock screen
+        setTimeout(showLockScreen, 1500); // Transition after a delay
       }
     }
 
@@ -219,7 +219,7 @@
       terminalLines.push(message);
       if (terminalLines.length > 8) terminalLines.shift(); // Keep only last 8 lines
       terminalOutput.textContent = terminalLines.join('\n');
-      terminalOutput.scrollTop = terminalOutput.scrollHeight; // Auto-scroll to bottom
+      terminalOutput.scrollTop = terminalOutput.scrollHeight; // Auto-scroll
     }
 
     function showLockScreen() {
@@ -239,9 +239,7 @@
     });
 
     function handleKey(key){
-      if(key === undefined) return;
-      if(key === '*' ) return;
-      if(key === '⌫') return;
+      if(key === undefined || key === '*' || key === '⌫') return;
       if(entered.length >= MAX_DIGITS) return;
       entered += key;
       refreshDots();
@@ -260,7 +258,7 @@
       } else {
         shake();
         entered = '';
-        setTimeout(refreshDots, 400); // Increased delay to match shake animation
+        setTimeout(refreshDots, 400); 
       }
     }
 
@@ -280,7 +278,7 @@
       homeScreen.setAttribute('aria-hidden','false');
     }
 
-    // --- GENERAL FUNCTIONS ---
+    // --- GENERAL & APP FUNCTIONS ---
 
     function tickTime(){
       const now = new Date();
@@ -296,8 +294,6 @@
       galleryGrid.innerHTML = '';
       for(let i=1;i<=6;i++){
         const img = document.createElement('img');
-        // NOTE: The actual images (assets/1.jpg etc.) must exist for this to work.
-        // For a standalone mockup, you might use placeholder image services like 'https://picsum.photos/100/100?random=${i}'
         img.src = `assets/${i}.jpg`; 
         img.alt = `Photo ${i}`;
         img.className = 'thumb';
@@ -331,7 +327,7 @@
 
     // Keyboard support for PIN entry (only active on lock screen)
     window.addEventListener('keydown', (e)=>{
-      if(document.getElementById('lockScreen').style.display === 'none') return; // Only work when lock screen is visible
+      if(lockScreen.style.display === 'none' || lockScreen.style.display === '') return; // Check if lock screen is visible
       if(e.key >= '0' && e.key <= '9'){
         handleKey(e.key);
       } else if(e.key === 'Backspace'){
