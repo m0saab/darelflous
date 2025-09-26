@@ -6,3 +6,9 @@ copy look boy
 https://m0saab.github.io/darelflous/minigamelook/looktwin.html
 copylook girl
 https://m0saab.github.io/darelflous/minigamelookgirl/looktwin.html
+
+
+safe crack 
+https://m0saab.github.io/darelflous/safe.html
+car escape
+https://m0saab.github.io/darelflous/cartest.html
