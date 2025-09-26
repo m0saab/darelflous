@@ -44,18 +44,18 @@
         
         /* context menu styles */
         #imageContextMenu{
-            position: fixed; /* Use fixed for absolute screen positioning */
+            position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.4); 
             backdrop-filter: none; 
             z-index: 1000; 
-            display: none; /* Controlled by JS */
+            display: none;
             align-items: flex-start; 
             justify-content: flex-start;
             padding: 0;
         }
         #contextMenuPanel{
-            position: absolute; /* Positioned relative to the overlay's origin */
+            position: absolute;
             width: auto;
             min-width: 150px;
             height: auto;
@@ -81,6 +81,46 @@
             margin: 6px 0;
         }
 
+        /* NEW: Loading Bar Styles */
+        #loadingOverlay {
+            background: var(--screen);
+            flex-direction: column;
+            gap: 20px;
+            z-index: 2000;
+        }
+        .loading-bar-container {
+            width: 80%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        #loadingBar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 10s linear;
+        }
+        .loading-text {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* NEW: Success Message Styles */
+        #successOverlay {
+            flex-direction: column;
+            gap: 30px;
+            text-align: center;
+            padding: 30px;
+            z-index: 3000;
+        }
+        .arabic-text {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.5;
+            color: var(--accent);
+            direction: rtl; /* For proper Arabic display */
+        }
 
         /* CCTV panel */
         .cctv-screen{display:flex;align-items:center;justify-content:center;height:100%;font-size:14px;color:var(--muted)}
@@ -147,6 +187,7 @@
                     <div class="grid" id="galleryGrid">
                         </div>
                 </div>
+                
                 <div class="overlay" id="imageContextMenu" aria-hidden="true">
                     <div class="panel" id="contextMenuPanel">
                         <div class="menu-item" id="menuItemSendToNetwork">Send to Network</div>
@@ -163,12 +204,27 @@
                 </div>
             </div>
 
+            <div class="overlay" id="loadingOverlay" aria-hidden="true">
+                <div class="loading-text">Hacking by Mosaab is loading...</div>
+                <div class="loading-bar-container">
+                    <div id="loadingBar"></div>
+                </div>
+            </div>
+            
+            <div class="overlay" id="successOverlay" aria-hidden="true">
+                <div class="arabic-text">
+                    لقد نجحت المهمة! <br> يمكنك الانتقال إلى المهمة التالية
+                </div>
+                <button class="btn" style="background:var(--accent); color:var(--screen); border:none; padding:12px 24px; font-weight:700;">OKAY</button>
+            </div>
+
         </div>
     </div>
 
     <script>
         const CORRECT_PIN = '1966';
         const MAX_DIGITS = 4;
+        const LOADING_TIME_MS = 10000; // 10 seconds
 
         const dots = document.querySelectorAll('.dot');
         const keys = document.querySelectorAll('.key');
@@ -184,17 +240,20 @@
         const closeCCTV = document.getElementById('closeCCTV');
         const galleryGrid = document.getElementById('galleryGrid');
         
-        // NEW: Context menu elements
+        // NEW: Overlays and Menu elements
         const imageContextMenu = document.getElementById('imageContextMenu');
         const contextMenuPanel = document.getElementById('contextMenuPanel');
         const menuItemSendToNetwork = document.getElementById('menuItemSendToNetwork');
         const menuItemView = document.getElementById('menuItemView');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingBar = document.getElementById('loadingBar');
+        const successOverlay = document.getElementById('successOverlay');
 
         let entered = '';
-        let pressTimer; // Variable to hold the long-press timer
-        let currentImageSrc = ''; // To store the source of the currently held image
+        let pressTimer;
+        let currentImageSrc = '';
 
-        // --- Keypad Logic (Original) ---
+        // --- Keypad Logic (Modified) ---
         keys.forEach(k=>{
             k.addEventListener('click', ()=> handleKey(k.dataset.key));
         });
@@ -219,7 +278,7 @@
 
         function checkPin(){
             if(entered === CORRECT_PIN){
-                unlock();
+                startHacking(); // Call the new loading sequence
             } else {
                 shake();
                 entered = '';
@@ -236,14 +295,32 @@
             ],{ duration: 400, iterations: 1 });
         }
 
-        function unlock(){
+        // NEW: Loading and Unlock sequence
+        function startHacking(){
             lockScreen.style.display = 'none';
             keypad.style.display = 'none';
+            
+            // Show loading bar
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.setAttribute('aria-hidden','false');
+            
+            // Start animation (must be done with a small delay for CSS transition to work)
+            setTimeout(() => {
+                loadingBar.style.width = '100%';
+            }, 50);
+
+            // Wait for 10 seconds, then unlock
+            setTimeout(unlock, LOADING_TIME_MS);
+        }
+
+        function unlock(){
+            loadingOverlay.style.display = 'none';
+            loadingBar.style.width = '0%'; // Reset bar
+            
             homeScreen.style.display = 'flex';
             homeScreen.setAttribute('aria-hidden','false');
         }
         // --- End Keypad Logic ---
-
 
         // --- Time/Date Logic (Original) ---
         function tickTime(){
@@ -257,27 +334,22 @@
         tickTime(); setInterval(tickTime, 30*1000);
         // --- End Time/Date Logic ---
 
-
         // --- Gallery Logic (Modified) ---
-
-        // 1. Modified loadGallery to include long-press listeners
         function loadGallery(){
             galleryGrid.innerHTML = '';
-            for(let i=1;i<=6;i++){
+            // NOTE: Using arbitrary images for demonstration. In a real environment, assets/x.jpg must exist.
+            for(let i=1;i<=6;i++){ 
                 const img = document.createElement('img');
-                // Note: The image source is still a placeholder, ensure 'assets/1.jpg' exists for full functionality
                 img.src = `assets/${i}.jpg`; 
                 img.alt = `Photo ${i}`;
                 img.className = 'thumb';
                 
-                // Attach event listeners for both mouse and touch
                 img.addEventListener('mousedown', startPress);
                 img.addEventListener('mouseup', endPress);
                 img.addEventListener('mouseleave', endPress);
                 img.addEventListener('touchstart', startPress);
                 img.addEventListener('touchend', endPress);
                 
-                // Store the image source on the element itself for easy access in handlers
                 img.dataset.src = img.src; 
 
                 galleryGrid.appendChild(img);
@@ -285,41 +357,33 @@
         }
 
         function openImageFull(src){
-             // Only open if the context menu is not visible/active
             if (imageContextMenu.style.display !== 'flex') { 
                 window.open(src, '_blank');
             }
         }
 
-        // 2. Start the long-press timer
         function startPress(e){
-            e.preventDefault(); // Prevent default browser context menu/mobile scrolling
+            e.preventDefault(); 
             const target = e.currentTarget;
-            currentImageSrc = target.dataset.src; // Store the source
+            currentImageSrc = target.dataset.src; 
 
-            // Clear any existing timer just in case
             clearTimeout(pressTimer); 
 
-            // Set a timer for 500ms (0.5 seconds) to simulate a long press
             pressTimer = setTimeout(()=>{
                 // Check if it's the specific target image (image 1.jpg)
                 if(currentImageSrc.endsWith('assets/1.jpg')){ 
-                    showContextMenu(e); // Show the menu
+                    showContextMenu(e); 
                 } else {
-                    // For other images, treat long press as a view action
                     openImageFull(currentImageSrc);
                     currentImageSrc = ''; 
                 }
             }, 500); 
         }
 
-        // 3. End the press (either mouse up or mouse leave)
         function endPress(e){
-            // If the timer is still running (meaning it was a short press/tap)
             if(pressTimer){
                 clearTimeout(pressTimer);
                 
-                // If it was a short press/tap on image 1, perform the default view action
                 if(currentImageSrc.endsWith('assets/1.jpg') && imageContextMenu.style.display !== 'flex'){
                     openImageFull(currentImageSrc);
                 }
@@ -327,21 +391,17 @@
             currentImageSrc = '';
         }
 
-        // 4. Display the context menu
         function showContextMenu(e){
             imageContextMenu.style.display = 'flex';
             imageContextMenu.setAttribute('aria-hidden','false');
             
-            // Get the click position relative to the screen (handles mouse and touch)
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             
-            // Set the position of the menu panel (simplified positioning, adjusting for phone borders)
             const phoneRect = document.querySelector('.phone').getBoundingClientRect();
             let posX = clientX - phoneRect.left;
             let posY = clientY - phoneRect.top;
 
-            // Simple bounds check for the menu panel
             const menuWidth = contextMenuPanel.offsetWidth || 180;
             const menuHeight = contextMenuPanel.offsetHeight || 120;
             const screenPadding = 20;
@@ -356,24 +416,26 @@
             contextMenuPanel.style.left = `${posX}px`;
             contextMenuPanel.style.top = `${posY}px`;
 
-            // Setup the View option handler dynamically
             menuItemView.onclick = () => {
                 hideContextMenu();
                 window.open(currentImageSrc, '_blank');
             };
         }
 
-        // 5. Hide the context menu
         function hideContextMenu(){
             imageContextMenu.style.display = 'none';
             imageContextMenu.setAttribute('aria-hidden','true');
             currentImageSrc = '';
         }
-        // --- End Gallery Logic (Modified) ---
 
+        // NEW: Show success message
+        function showSuccessMessage() {
+            successOverlay.style.display = 'flex';
+            successOverlay.setAttribute('aria-hidden','false');
+        }
 
-        // --- App/Overlay Event Listeners (Original + New Menu Click) ---
-
+        // --- App/Overlay Event Listeners (Modified) ---
+        
         // Gallery App Click
         appGallery.addEventListener('click', ()=>{
             galleryOverlay.style.display = 'flex';
@@ -385,7 +447,7 @@
         closeGallery.addEventListener('click', ()=>{
             galleryOverlay.style.display = 'none';
             galleryOverlay.setAttribute('aria-hidden','true');
-            hideContextMenu(); // Ensure menu is closed if visible
+            hideContextMenu(); 
         });
         
         // CCTV App Click
@@ -400,15 +462,20 @@
             cctvOverlay.setAttribute('aria-hidden','true');
         });
 
-        // Context Menu: "Send to Network" Action
+        // Context Menu: "Send to Network" Action -> Shows Success Message
         menuItemSendToNetwork.addEventListener('click', ()=>{
-            alert(`✅ ACTION: Sending ${currentImageSrc.split('/').pop()} to Network...`);
             hideContextMenu();
+            showSuccessMessage();
+        });
+
+        // Success Overlay: "OKAY" button action (simple hide for now)
+        successOverlay.querySelector('.btn').addEventListener('click', () => {
+            successOverlay.style.display = 'none';
+            successOverlay.setAttribute('aria-hidden','true');
         });
 
         // Context Menu: Close when clicking on the background overlay
         imageContextMenu.addEventListener('click', (e)=>{
-            // Check if the click target is the overlay background itself, not the menu panel
             if(e.target.id === 'imageContextMenu'){
                 hideContextMenu();
             }
