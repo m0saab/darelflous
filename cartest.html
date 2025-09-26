@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Single Player</title>
+    <style type="text/css">
+        /* Global & Body Styling for Dark Mode */
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            background-color: #121212;
+            font-family: 'Tahoma', sans-serif;
+            color: #E0E0E0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #container {
+            position: relative;
+            height: 100vh;
+            width: 25%; 
+            min-width: 250px;
+            background-color: #292929;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+        
+        /* ----------------------- GTA STAR BADGE ----------------------- */
+        #wanted_level {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: none;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        .star {
+            font-size: 20px;
+            color: #888;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            margin-right: 2px;
+            display: inline-block;
+        }
+        
+        .star.earned {
+            color: #F8C300;
+        }
+        
+        /* ----------------------- INTRO/DIALOGUE STYLING ----------------------- */
+
+        #intro_message_div, #dialogue_div {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(18, 18, 18, 0.98);
+            color: white;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            top: 0;
+            left: 0;
+            z-index: 20;
+            white-space: pre-wrap;
+            direction: rtl;
+        }
+
+        #intro_message_div h1, #dialogue_div h1 {
+            font-size: 45px;
+            margin-bottom: 30px;
+            color: #FFDF5A;
+        }
+        
+        /* Final Message Bolder/Bigger */
+        #dialogue_div p {
+            font-size: 35px; 
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        #intro_message_div button, #dialogue_div button {
+            border: none;
+            padding: 15px 30px;
+            color: white;
+            background-color: #8a64ff;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* ----------------------- HOUSE STYLING ----------------------- */
+        #house {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background-color: #4CAF50;
+            border: 5px solid #388E3C;
+            border-radius: 5px;
+            top: -200px;
+            left: -200px;
+            z-index: 4;
+            display: none;
+        }
+        
+        #house::before {
+            content: '🏠 دار مصعب';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFDF5A;
+            font-size: 14px;
+            white-space: nowrap;
+            direction: rtl;
+            font-weight: bold;
+        }
+        
+        /* ----------------------- ROAD & CAR STYLING ----------------------- */
+
+        /*Styling the Road Surface Markings*/
+        .line_1,
+        .line_2,
+        .line_3,
+        .line_4 {
+            position: absolute;
+            height: 200px;
+            width: 4%;
+            margin-left: 48%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+        }
+
+        .line_1 { top: -150px; }
+        .line_2 { top: 145px; }
+        .line_3 { top: 440px; }
+        .line_4 { top: 735px; }
+
+        .line_5,
+        .line_6 {
+            position: absolute;
+            width: 10px;
+            height: 100%;
+            background: red;
+        }
+
+        .line_6 { margin-left: calc(100% - 10px); }
+
+        /*Styling the cars*/
+        .car {
+            position: absolute;
+            height: 60px;
+            width: 40px;
+            border-radius: 5px;
+            box-shadow: 0px 1px 8px 0px black;
+        }
+
+        #car {
+            bottom: 8%;
+            left: 60%;
+            background-color: #ffdf5a;
+        }
+        
+        /* Glass for all cars */
+        .f_glass, .b_glass {
+            position: absolute;
+            height: 20%;
+            width: 60%;
+            margin-left: 20%;
+            background-color: #484848;
+            border-radius: 5px;
+        }
+
+        .f_glass { top: 15%; border-radius: 0px 0px 5px 5px; }
+        .b_glass { bottom: 15%; border-radius: 5px 5px 0px 0px; }
+        
+        /* Lights - Player Car (Default Setup - Forward is yellow, Back is red) */
+        .f_light_l, .f_light_r, .b_light_l, .b_light_r {
+            position: absolute;
+            height: 10%;
+            width: 20%;
+        }
+        .f_light_l { top: -6%; margin-left: 10%; background-color: #efefef; border-radius: 5px 5px 0px 0px; }
+        .f_light_r { top: -6%; margin-left: 70%; background-color: #efefef; border-radius: 5px 5px 0px 0px; }
+        .b_light_l { top: 96%; margin-left: 10%; background-color: red; border-radius: 0px 0px 5px 5px; }
+        .b_light_r { top: 96%; margin-left: 70%; background-color: red; border-radius: 0px 0px 5px 5px; }
+        
+        /* Lights - Obstacle Cars (Reversed Setup - Back is yellow, Front is red) */
+        .rev_f_light_l, .rev_f_light_r, .rev_b_light_l, .rev_b_light_r {
+            position: absolute;
+            height: 10%;
+            width: 20%;
+        }
+        .rev_f_light_l { top: 96%; margin-left: 10%; background-color: #efefef; border-radius: 0px 0px 5px 5px; } /* Bottom - White */
+        .rev_f_light_r { top: 96%; margin-left: 70%; background-color: #efefef; border-radius: 0px 0px 5px 5px; } /* Bottom - White */
+        .rev_b_light_l { top: -6%; margin-left: 10%; background-color: red; border-radius: 5px 5px 0px 0px; } /* Top - Red */
+        .rev_b_light_r { top: -6%; margin-left: 70%; background-color: red; border-radius: 5px 5px 0px 0px; } /* Top - Red */
+
+        /* Tyres for all cars */
+        .f_tyre_l, .f_tyre_r, .b_tyre_l, .b_tyre_r {
+            position: absolute;
+            height: 20%;
+            width: 10%;
+            background-color: grey;
+        }
+        .f_tyre_l { top: 20%; left: -10%; border-radius: 5px 0px 0px 5px; }
+        .f_tyre_r { top: 20%; left: 100%; border-radius: 0px 5px 5px 0px; }
+        .b_tyre_l { top: 70%; left: -10%; border-radius: 5px 0px 0px 5px; }
+        .b_tyre_r { top: 70%; left: 100%; border-radius: 0px 5px 5px 0px; }
+
+        #car_1 { top: -100px; left: 60%; background-color: red; }
+        #car_2 { top: -200px; left: 40%; background-color: blue; }
+        #car_3 { top: -350px; left: 50%; background-color: green; }
+
+        /* ----------------------- RESTART STYLING ----------------------- */
+        #restart_div {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(18, 18, 18, 0.98);
+            color: white;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 40px;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        #end_message {
+            font-size: 70px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #FF4444;
+        }
+
+        /*Text on the restart button*/
+        #restart_btn {
+            border: none;
+            padding: 25px;
+            color: white;
+            background-color: #8a64ff;
+            font-size: 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s ease-in-out;
+        }
+
+        /*Styling the score board*/
+        #score_div {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 35px;
+            background-color: #333;
+            color: #FFDF5A;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 4px 4px 0px 1px #111;
+            z-index: 5;
+        }
+
+        .return {
+            position: absolute;
+            padding: 15px 25px;
+            font-size: 24px;
+            text-align: center;
+            cursor: pointer;
+            outline: none;
+            color: #121212;
+            background-color: rgb(235, 235, 34);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #555;
+            top: 1%;
+            right: 1%;
+            z-index: 20;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <audio id="car_sound" src="carstage.mp3" preload="auto" loop></audio>
+
+    <button id="return" class="return">↵</button>
+    
+    <div id="intro_message_div">
+        <h1>مهمة الهروب: ابحث عن الرقم!</h1>
+        <p>تو وقيت بش تهرب، أما لزمك تاخو رقم عصام بوعكاز لبش يصرفلك مجوهرات لفلوس.</p>
+        <p>بش تلقا رقمو لزمك تمشي لدار **مصعب**، بش تسللها لزمك توصل مستوى **60**.</p>
+        <p>حاول تتفادى السيارات الأخرى لتصل للمستوى المطلوب.</p>
+        <button id="start_game_btn">إبدأ اللعبة</button>
+    </div>
+
+    <div id="dialogue_div" style="display: none;">
+        <h1>!مبروك! لقد وصلت لدار مصعب</h1>
+        <p>رقم عصام هو: **01020304**</p>
+        <p>كلموا بل **2 هواتف**</p>
+        <button id="finish_game_btn">أكمل الهروب</button>
+    </div>
+
+    <div id="score_div" style="display: none;">
+        Level: <span id="score">0</span>
+    </div>
+    
+    <div id="wanted_level">
+        <span class="star" id="star1">★</span>
+        <span class="star" id="star2">★</span>
+        <span class="star" id="star3">★</span>
+        <span class="star" id="star4">★</span>
+        <span class="star" id="star5">★</span>
+    </div>
+    
+    <div id="container">
+        <div class="line_1"></div>
+        <div class="line_2"></div>
+        <div class="line_3"></div>
+        <div class="line_4"></div>
+        <div class="line_5"></div>
+        <div class="line_6"></div>
+        <div id="house"></div>
+        
+        <div id="car" class="car">
+            <div class="f_glass"></div>
+            <div class="b_glass"></div>
+            <div class="f_light_l"></div>
+            <div class="f_light_r"></div>
+            <div class="b_light_l"></div>
+            <div class="b_light_r"></div>
+            <div class="f_tyre_l"></div>
+            <div class="f_tyre_r"></div>
+            <div class="b_tyre_l"></div>
+            <div class="b_tyre_r"></div>
+        </div>
+        
+        <div id="car_1" class="car">
+            <div class="f_glass"></div>
+            <div class="b_glass"></div>
+            <div class="rev_f_light_l"></div>
+            <div class="rev_f_light_r"></div>
+            <div class="rev_b_light_l"></div>
+            <div class="rev_b_light_r"></div>
+            <div class="f_tyre_l"></div>
+            <div class="f_tyre_r"></div>
+            <div class="b_tyre_l"></div>
+            <div class="b_tyre_r"></div>
+        </div>
+        
+        <div id="car_2" class="car">
+            <div class="f_glass"></div>
+            <div class="b_glass"></div>
+            <div class="rev_f_light_l"></div>
+            <div class="rev_f_light_r"></div>
+            <div class="rev_b_light_l"></div>
+            <div class="rev_b_light_r"></div>
+            <div class="f_tyre_l"></div>
+            <div class="f_tyre_r"></div>
+            <div class="b_tyre_l"></div>
+            <div class="b_tyre_r"></div>
+        </div>
+        
+        <div id="car_3" class="car">
+            <div class="f_glass"></div>
+            <div class="b_glass"></div>
+            <div class="rev_f_light_l"></div>
+            <div class="rev_f_light_r"></div>
+            <div class="rev_b_light_l"></div>
+            <div class="rev_b_light_r"></div>
+            <div class="f_tyre_l"></div>
+            <div class="f_tyre_r"></div>
+            <div class="b_tyre_l"></div>
+            <div class="b_tyre_r"></div>
+        </div>
+        
+        <div id="restart_div">
+            <h1 id="end_message"></h1>
+            <button id="restart_btn">
+                <p>Restart</p>
+                <small class="small_text">(press Enter)</small>
+            </button>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        $(function () {
+            var anim_id;
+            const max_level = 60;
+            const stars_to_show = 5;
+            //saving dom objects to variables
+            var container = $('#container'),
+                car = $('#car'),
+                car_1 = $('#car_1'),
+                car_2 = $('#car_2'),
+                car_3 = $('#car_3'),
+                line_5 = $('.line_5'),
+                line_6 = $('.line_6'),
+                restart_div = $('#restart_div'),
+                restart_btn = $('#restart_btn'),
+                end_message = $('#end_message'),
+                score_element = $('#score'),
+                intro_message_div = $('#intro_message_div'),
+                start_game_btn = $('#start_game_btn'),
+                dialogue_div = $('#dialogue_div'),
+                house = $('#house'),
+                wanted_level = $('#wanted_level'),
+                car_sound = document.getElementById('car_sound'); // NEW: Get audio element
+
+            //saving some initial setup
+            var container_width = parseInt(container.width()),
+                container_height = parseInt(container.height()),
+                car_width = parseInt(car.width()),
+                car_height = parseInt(car.height()),
+                line_width_l = parseInt(line_5.width()),
+                line_width_r = parseInt(line_6.width());
+
+            //some other declarations
+            var game_over = true, 
+                level_complete = false,
+                score_counter = 1,
+                speed = 6, 
+                line_speed = 3, 
+                move_right = false,
+                move_left = false,
+                move_up = false,
+                move_down = false;
+
+            // Hide all game elements initially
+            $('#score_div, #car, #car_1, #car_2, #car_3, .line_1, .line_2, .line_3, .line_4, .line_5, .line_6, #wanted_level').hide();
+
+            // Function to update the star badge (1 star per 12 levels)
+            function update_stars(current_level) {
+                var earned_stars = Math.min(stars_to_show, Math.floor(current_level / 12));
+                
+                for (let i = 1; i <= stars_to_show; i++) {
+                    var star = $('#star' + i);
+                    if (i <= earned_stars) {
+                        star.addClass('earned');
+                    } else {
+                        star.removeClass('earned');
+                    }
+                }
+            }
+
+
+            // Start Game Button Click
+            start_game_btn.click(function () {
+                intro_message_div.hide();
+                game_over = false; // Start the game
+                
+                // NEW: Play the game sound
+                car_sound.play().catch(e => console.log("Audio playback failed: ", e));
+
+                // Show game elements
+                $('#score_div, #car, #car_1, #car_2, #car_3, .line_1, .line_2, .line_3, .line_4, .line_5, .line_6, #wanted_level').show();
+                
+                car.css({ 'bottom': '8%', 'left': '60%', 'top': '' });
+                anim_id = requestAnimationFrame(repeat);
+            });
+            
+            // Finish Game Button Click
+            $('#finish_game_btn').click(function() {
+                dialogue_div.hide();
+                car_sound.pause(); // Stop sound on game completion
+                stop_the_game("Great Escape Complete! Now make the call!");
+            });
+
+
+            /* ------------------------------GAME CODE STARTS HERE------------------------------------------- */
+
+            /* Move the cars */
+            $(document).on('keydown', function (e) {
+                if (game_over === false) {
+                    var key = e.keyCode;
+                    
+                    // M key cheat (77 is 'M')
+                    if (key === 77) { 
+                        score_element.text(max_level - 1); // Set to 59, so the next loop hits 60
+                        return; // Do not process as movement
+                    }
+                    
+                    if (key === 37 && move_left === false) {
+                        move_left = requestAnimationFrame(left);
+                    } else if (key === 39 && move_right === false) {
+                        move_right = requestAnimationFrame(right);
+                    } else if (key === 38 && move_up === false) {
+                        move_up = requestAnimationFrame(up);
+                    } else if (key === 40 && move_down === false) {
+                        move_down = requestAnimationFrame(down);
+                    }
+                }
+            });
+            $(document).on('keyup', function (e) {
+                if (game_over === false) {
+                    var key = e.keyCode;
+                    if (key === 37) {
+                        cancelAnimationFrame(move_left);
+                        move_left = false;
+                    } else if (key === 39) {
+                        cancelAnimationFrame(move_right);
+                        move_right = false;
+                    } else if (key === 38) {
+                        cancelAnimationFrame(move_up);
+                        move_up = false;
+                    } else if (key === 40) {
+                        cancelAnimationFrame(move_down);
+                        move_down = false;
+                    }
+                }
+            });
+
+            function left() {
+                var boundary = level_complete ? -house.outerWidth() : line_width_l;
+                if (game_over === false && parseInt(car.css('left')) > boundary) {
+                    car.css('left', parseInt(car.css('left')) - 5);
+                    move_left = requestAnimationFrame(left);
+                }
+            }
+            function right() {
+                var boundary = level_complete ? container_width : container_width - car_width - line_width_r;
+                if (game_over === false && parseInt(car.css('left')) < boundary) {
+                    car.css('left', parseInt(car.css('left')) + 5);
+                    move_right = requestAnimationFrame(right);
+                }
+            }
+            
+            function up() {
+                var boundary = level_complete ? -50 : 10;
+                if (game_over === false && parseInt(car.css('top')) > boundary) {
+                    car.css('top', parseInt(car.css('top')) - 3);
+                    move_up = requestAnimationFrame(up);
+                }
+            }
+            function down() {
+                var boundary = level_complete ? container_height : container_height - car_height - 10;
+                if (game_over === false && parseInt(car.css('top')) < boundary) {
+                    car.css('top', parseInt(car.css('top')) + 3);
+                    move_down = requestAnimationFrame(down);
+                }
+            }
+
+            /* Main Game Loop */
+            function repeat() {
+                if (game_over === false) {
+                    var current_score = parseInt(score_element.text());
+                    
+                    // Update the star badge based on current score
+                    update_stars(current_score); 
+
+                    // --- Pre-Level 60 Game Loop ---
+                    if (current_score < max_level) {
+                        if (collision(car, car_1) || collision(car, car_2) || collision(car, car_3)) {
+                            car_sound.pause(); // Stop sound on crash
+                            stop_the_game("Game Over! Try again to reach level 60.");
+                        }
+
+                        score_counter++;
+                        // DIFFICULTY CHANGE: Level increases every 30 score cycles
+                        if (score_counter % 30 == 0 && current_score < max_level) { 
+                            score_element.text(current_score + 1);
+                        }
+                        // DIFFICULTY CHANGE: Speed increases every 300 cycles
+                        if (score_counter % 300 == 0) {
+                            speed++;
+                            line_speed++;
+                        }
+                        
+                        car_down(car_1);
+                        car_down(car_2);
+                        car_down(car_3);
+                        line_down($('.line_1'));
+                        line_down($('.line_2'));
+                        line_down($('.line_3'));
+                        line_down($('.line_4'));
+                        
+                    } else {
+                        // --- Post-Level 60 "Escape" Mode ---
+                        if (level_complete === false) {
+                            level_complete = true;
+                            // Hide obstacles, show the house, and hide the stars
+                            $('#car_1, #car_2, #car_3, .line_1, .line_2, .line_3, .line_4, #wanted_level').hide();
+                            
+                            var house_top = container_height / 3; 
+                            var house_left = line_width_l + 10; 
+                            
+                            house.css({
+                                'display': 'block',
+                                'top': house_top,
+                                'left': house_left
+                            });
+                            
+                            car.css('left', line_width_l + 10);
+                            car.css('top', container_height - car_height - 10);
+                            
+                            // Corrected name in alert
+                            alert("!! لقد وصلت للمستوى 60. الآن يمكنك القيادة بحرية! ابحث عن دار مصعب (Mosaab's House) في أي مكان على الشاشة. !!");
+                        }
+                        
+                        // Check for collision with the House
+                        if (collision(car, house)) {
+                            game_over = true;
+                            cancelAnimationFrame(anim_id);
+                            car_sound.pause(); // Stop sound on dialogue open
+                            dialogue_div.css('display', 'flex'); // Show the final dialogue
+                            return; // Stop the loop
+                        }
+                    }
+
+                    anim_id = requestAnimationFrame(repeat);
+                }
+            }
+
+            function car_down(car) {
+                var car_current_top = parseInt(car.css('top'));
+                if (car_current_top > container_height) {
+                    car_current_top = -200;
+                    var car_left = parseInt(Math.random() * (container_width - car_width - line_width_l));
+                    car.css('left', car_left);
+                }
+                car.css('top', car_current_top + speed);
+            }
+            function line_down(line) {
+                var line_current_top = parseInt(line.css('top'));
+                if (line_current_top > container_height) {
+                    line_current_top = -200;
+                }
+                line.css('top', line_current_top + line_speed);
+            }
+
+            restart_btn.click(function () {
+                location.reload();
+            });
+            function stop_the_game(message) {
+                game_over = true;
+                cancelAnimationFrame(anim_id);
+                cancelAnimationFrame(move_right);
+                cancelAnimationFrame(move_left);
+                cancelAnimationFrame(move_up);
+                cancelAnimationFrame(move_down);
+                end_message.text(message);
+                restart_div.css('display', 'flex');
+                restart_btn.focus();
+            }
+            /* ------------------------------GAME CODE ENDS HERE------------------------------------------- */
+            function collision($div1, $div2) {
+                var x1 = $div1.offset().left,
+                    y1 = $div1.offset().top,
+                    h1 = $div1.outerHeight(true),
+                    w1 = $div1.outerWidth(true),
+                    b1 = y1 + h1,
+                    r1 = x1 + w1,
+                    x2 = $div2.offset().left,
+                    y2 = $div2.offset().top,
+                    h2 = $div2.outerHeight(true),
+                    w2 = $div2.outerWidth(true),
+                    b2 = y2 + h2,
+                    r2 = x2 + w2;
+                if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) return false;
+                return true;
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        document.getElementById("return").onclick = function () {
+            location.reload();
+        };
+    </script>
+</body>
+
+</html>
